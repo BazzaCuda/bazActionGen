@@ -1,0 +1,6 @@
+NoParam
+String: string
+Integer: integer
+StringInteger: string integer
+Boolean:boolean
+
