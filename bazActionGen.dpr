@@ -43,10 +43,8 @@ var
 
 procedure writeUnitHeader(const aSL: TStringList);
 begin
-  aSL.add('unit bazAction;');
-
   aSL.add('''
-{
+{   bazLib / bazAction
     Copyright (C) 2021-2099 Baz Cuda
     https://github.com/BazzaCuda/
 
@@ -65,6 +63,7 @@ begin
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307, USA
 
 ''' + '}');
+  aSL.add('unit bazAction;');
 
   aSL.add('');
   aSL.add('interface');
