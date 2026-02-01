@@ -25,8 +25,11 @@ program bazActionGen;
 
 uses
   system.classes,
+  system.generics.collections,
   system.sysUtils,
+  vcl.dialogs,
   bazAction in 'Win64\Debug\bazAction.pas',
+  mmpAction in 'Win64\Debug\mmpAction.pas',
   bazRTL in '..\_MVVM\_bazLib\bazRTL.pas';
 
 type
@@ -38,32 +41,40 @@ type
 
   TDefs = array of TDef;
 
+  TVoid = record end;
+
+const
+  BAZ_ACTION_UNIT   = 'bazAction';
+  FILE_PATH_IN      = 'bazActionDefs.txt';
+  FILE_PATH_OUT     = 'bazAction.pas';
+
 var
   vDefs: TDefs;
+  vUnit: string = '';
 
 procedure writeUnitHeader(const aSL: TStringList);
 begin
-  aSL.add('''
-{   bazLib / bazAction
-    Copyright (C) 2021-2099 Baz Cuda
-    https://github.com/BazzaCuda/
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307, USA
-
-''' + '}');
-  aSL.add('unit bazAction;');
+//  aSL.add('''
+//{   bazLib / bazAction
+//    Copyright (C) 2021-2099 Baz Cuda
+//    https://github.com/BazzaCuda/
+//
+//    This program is free software; you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation; either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with this program; if not, write to the Free Software
+//    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307, USA
+//
+//''' + '}');
+//  aSL.add('unit bazAction;');
 
   aSL.add('');
   aSL.add('interface');
@@ -102,7 +113,11 @@ procedure writeInterface(const aDefs: TDefs; const aSL: TStringList);
 const
   WIDTH_PARAMS = 70;
 begin
-  aSL.add('  IAction<TResult> = interface');
+  case vUnit = BAZ_ACTION_UNIT of  TRUE: aSL.add('  IAction<TResult> = interface');
+                                  FALSE: aSL.add('  IAction<TResult> = interface(bazAction.IAction<TResult>)'); end;
+
+  aSL.add('    function default(const aValue: TResult): IAction<TResult>; // the fallback value');
+  aSL.add('');
 
   for var i := 0 to length(aDefs) - 1 do
     aSL.add(format('    function perform(%-*sTResult; overload;', [WIDTH_PARAMS, aDefs[i].paramDefs + '):']));
@@ -116,7 +131,8 @@ end;
 
 procedure writeClassHeader(const aDefs: TDefs; const aSL: TStringList);
 begin
-  aSL.add('  TAction<TResult> = class(TInterfacedObject, IAction<TResult>)');
+  case vUnit = BAZ_ACTION_UNIT of  TRUE: aSL.add('  TAction<TResult> = class(TInterfacedObject, IAction<TResult>)');
+                                  FALSE: aSL.add('  TAction<TResult> = class(bazAction.TAction<TResult>, bazAction.IAction<TResult>)'); end;
 end;
 
 procedure writeClassMembers(const aDefs: TDefs; const aSL: TStringList);
@@ -125,6 +141,7 @@ const
 begin
   aSL.add('  strict private');
   aSL.add('    FFuncAssigned: boolean;');
+  aSL.add('    FDefault:      TResult; // initialised in constructor, used in perform');
   aSL.add('');
 
   for var i := 0 to high(aDefs) do
@@ -163,6 +180,7 @@ const
 begin
   aSL.add('  public');
   aSL.add('    function getAssigned: boolean;');
+  aSL.add('    function default(const aValue: TResult): IAction<TResult>;');
   aSL.add('');
 
   for var i := 0 to high(aDefs) do
@@ -278,32 +296,35 @@ procedure writePicks(const aDefs: TDefs; const aSL: TStringList);
 begin
   for var i := 0 to high(aDefs) do
   begin
-    aSL.add(format('class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc%s: TOFunc%s<TResult>): IAction<TResult>;',
-      [aDefs[i].suffix, aDefs[i].suffix]));
+    aSL.add(format('class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc%s: TOFunc%s<TResult>): IAction<TResult>;', [aDefs[i].suffix, aDefs[i].suffix]));
     aSL.add('begin');
     aSL.add('  case aBoolean of');
-    aSL.add(format('     TRUE:  result := TAction<TResult>.Create(aTrueFunc%s);', [aDefs[i].suffix]));
-    aSL.add('    FALSE:  result := TAction<TResult>.Create(NIL);');
+
+    var vPointerPrefix: string := '';
+    var vPointerSuffix: string := '';
+    case vUnit = BAZ_ACTION_UNIT of FALSE: vPointerPrefix := 'IAction<TResult>(Pointer('; end;
+    case vUnit = BAZ_ACTION_UNIT of FALSE: vPointerSuffix := '))'; end;
+
+    aSL.add(format('     TRUE:  result := %sTAction<TResult>.Create(aTrueFunc%s)%s;', [vPointerPrefix, aDefs[i].suffix, vPointerSuffix]));
+    aSL.add(format('    FALSE:  result := %sTAction<TResult>.Create(NIL)%s;', [vPointerPrefix, vPointerSuffix]));
     aSL.add('  end;');
     aSL.add('end;');
     aSL.add('');
 
-    aSL.add(format('class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc%s: TSFunc%s<TResult>): IAction<TResult>;',
-      [aDefs[i].suffix, aDefs[i].suffix]));
+    aSL.add(format('class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc%s: TSFunc%s<TResult>): IAction<TResult>;', [aDefs[i].suffix, aDefs[i].suffix]));
     aSL.add('begin');
     aSL.add('  case aBoolean of');
-    aSL.add(format('     TRUE:  result := TAction<TResult>.Create(aTrueFunc%s);', [aDefs[i].suffix]));
-    aSL.add('    FALSE:  result := TAction<TResult>.Create(NIL);');
+    aSL.add(format('     TRUE:  result := %sTAction<TResult>.Create(aTrueFunc%s)%s;', [vPointerPrefix, aDefs[i].suffix, vPointerSuffix]));
+    aSL.add(format('    FALSE:  result := %sTAction<TResult>.Create(NIL)%s;', [vPointerPrefix, vPointerSuffix]));
     aSL.add('  end;');
     aSL.add('end;');
     aSL.add('');
 
-    aSL.add(format('class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc%s: TAFunc%s<TResult>): IAction<TResult>;',
-      [aDefs[i].suffix, aDefs[i].suffix]));
+    aSL.add(format('class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc%s: TAFunc%s<TResult>): IAction<TResult>;', [aDefs[i].suffix, aDefs[i].suffix]));
     aSL.add('begin');
     aSL.add('  case aBoolean of');
-    aSL.add(format('     TRUE:  result := TAction<TResult>.Create(aTrueFunc%s);', [aDefs[i].suffix]));
-    aSL.add('    FALSE:  result := TAction<TResult>.Create(NIL);');
+    aSL.add(format('     TRUE:  result := %sTAction<TResult>.Create(aTrueFunc%s)%s;', [vPointerPrefix, aDefs[i].suffix, vPointerSuffix]));
+    aSL.add(format('    FALSE:  result := %sTAction<TResult>.Create(NIL)%s;', [vPointerPrefix, vPointerSuffix]));
     aSL.add('  end;');
     aSL.add('end;');
     aSL.add('');
@@ -318,11 +339,23 @@ begin
   aSL.add('end;');
   aSL.add('');
 
+  var vPointerPrefix: string := '';
+  var vPointerSuffix: string := '';
+  case vUnit = BAZ_ACTION_UNIT of FALSE: vPointerPrefix := 'IAction<TResult>(Pointer('; end;
+  case vUnit = BAZ_ACTION_UNIT of FALSE: vPointerSuffix := '))'; end;
+
+  aSL.add('function TAction<TResult>.default(const aValue: TResult): IAction<TResult>;');
+  aSL.add('begin');
+  aSL.add('  FDefault := aValue;');
+  aSL.add(format('  result   := %sSELF%s;', [vPointerPrefix, vPointerSuffix]));
+  aSL.add('end;');
+  aSL.add('');
+
   for var i := 0 to high(aDefs) do
   begin
     aSL.add('function TAction<TResult>.perform(' + aDefs[i].paramDefs + '): TResult;');
     aSL.add('begin');
-    aSL.add('  result := default(TResult);');
+    aSL.add('  result := FDefault;');
     aSL.add('  case assigned(FOFunc' + aDefs[i].suffix + ') of TRUE: EXIT(FOFunc' + aDefs[i].suffix + '(' + aDefs[i].paramList+ ')); end;');
     aSL.add('  case assigned(FSFunc' + aDefs[i].suffix + ') of TRUE: EXIT(FSFunc' + aDefs[i].suffix + '(' + aDefs[i].paramList + ')); end;');
     aSL.add('  case assigned(FAFunc' + aDefs[i].suffix + ') of TRUE: EXIT(FAFunc' + aDefs[i].suffix + '(' + aDefs[i].paramList + ')); end;');
@@ -333,14 +366,42 @@ begin
   aSL.add('end.');
 end;
 
+function copySection(const aHeader: string; const aFilePath: string; const aSL: TStringList): TVoid;
+begin
+  var vInput := TStringList.create;
+  try
+    vInput.loadFromFile(aFilePath);
+    var vCopying: boolean := FALSE;
 
-procedure writeUnit(const aDefs: TDefs; const aFilePath: string);
+    for var vLine: string in vInput do
+    begin
+      case (aHeader = '') and (vLine.startsWith(':')) of TRUE:  begin
+                                                                  vUnit := copy(vLine, 2, maxInt);
+                                                                  aSL.add(format('unit %s;', [vUnit]));
+                                                                  BREAK; end;end;
+
+      vCopying := vCopying and NOT vLine.startsWith('#');
+
+      case vCopying of TRUE: aSL.add(vLine); end;
+
+      vCopying := vCopying or (vLine = aHeader);
+    end;
+
+  finally
+    vInput.free;
+  end;
+end;
+
+procedure writeUnit(const aDefs: TDefs; const aFilePathIn: string);
 begin
   var vSL := TStringList.Create;
   try
+    copySection('#copyright', aFilePathIn, vSL);
+    copySection('',  aFilePathIn, vSL); // obtains vUnit and writes out the unit name
     writeUnitHeader(vSL);
+    copySection('#uses',  aFilePathIn, vSL);
     writeTypes(aDefs, vSL);
-    writeInterface(aDefs, vSL);
+    writeInterface(aDefs, vSL); // interface definition, not the interface section header
     writeClassHeader(aDefs, vSL);
     writeClassMembers(aDefs, vSL);
     writeClassConstructors(aDefs, vSL);
@@ -351,9 +412,36 @@ begin
     writeConstructors(aDefs, vSL);
     writePicks(aDefs, vSL);;
     writePerforms(aDefs, vSL);
-    vSL.saveToFile(aFilePath);
+    vSL.saveToFile(vUnit + '.pas');
   finally
     vSL.Free;
+  end;
+end;
+
+function getNames(const aDataTypes: TArray<string>): TArray<string>;
+begin
+  result      := copy(aDataTypes);
+  var vTotals := TDictionary<string, integer>.create;
+  var vCounts := TDictionary<string, integer>.create;
+
+  try
+
+    for var vType in aDataTypes do vTotals.addOrSetValue(vType, 0);
+    for var vType in aDataTypes do vCounts.addOrSetValue(vType, 0);
+
+    for var vType in aDataTypes do vTotals.addOrSetValue(vType, vTotals.items[vType] + 1);
+
+    for var i := low(result) to high(result) do
+    begin
+      var vType := result[i];
+      vCounts.addOrSetValue(vType, vCounts.items[vType] + 1);
+
+      case vTotals.items[vType] > 1 of TRUE: result[i] := vType + vCounts.items[vType].toString; end;
+    end;
+
+  finally
+    vCounts.free;
+    vTotals.free;
   end;
 end;
 
@@ -362,11 +450,13 @@ begin
   var vLines := TStringList.Create;
   try
     vLines.loadFromFile(aFilePath);
-    setLength(aDefs, vLines.count);
+
+    var vStartIx := vLines.indexOf('#types') + 1;
+    setLength(aDefs, vLines.count - vStartIx);
 
     var vDefIx := -1;
 
-    for var i := 0 to vLines.count - 1 do
+    for var i := vStartIx to vLines.count - 1 do
     begin
       var vLine := trim(vLines[i]);
 
@@ -378,6 +468,8 @@ begin
 
       var vDataTypes: TArray<string>;                                         // if datatypes are included, the record type suffix must be terminated by a colon
       case length(vLineParts) > 1 of TRUE: vDataTypes := vLineParts[1].split([' '], TStringSplitOptions.ExcludeEmpty); end; // datatypes must be separated with a space
+
+      var vNames := getNames(vDataTypes);
 
       // data accepted
       inc(vDefIx);
@@ -391,8 +483,8 @@ begin
 
       for var j := 0 to length(vDataTypes) - 1 do
       begin
-        vParamDefs := vParamDefs + format('%sconst a%s: %s', [vSemiColon, upperCase(vDataTypes[j][1]) + copy(vDataTypes[j], 2, maxInt), vDataTypes[j]]);
-        vParamList := vParamList + format('%sa%s', [vComma, upperCase(vDataTypes[j][1]) + copy(vDataTypes[j], 2, maxInt)]);
+        vParamDefs := vParamDefs + format('%sconst a%s: %s', [vSemiColon, upperCase(vNames[j][1]) + copy(vNames[j], 2, maxInt), vDataTypes[j]]);
+        vParamList := vParamList + format('%sa%s', [vComma, upperCase(vNames[j][1]) + copy(vNames[j], 2, maxInt)]);
         vSemiColon := '; ';
         vComma     := ', ';
       end;
@@ -405,6 +497,11 @@ begin
   finally
     vLines.free;
   end;
+end;
+
+function test(const aString: string; const aBoolean: boolean): boolean;
+begin
+  writeln(aString + ' from mmpAction');
 end;
 
 procedure testReadDefs(const aFilePath: string);
@@ -423,10 +520,12 @@ end;
 
 begin
   try
-//    testReadDefs('bazActionDefs.txt');
+    // testReadDefs('bazActionDefs.txt');
 
-    readDefs(vDefs, 'bazActionDefs.txt');
-    writeUnit(vDefs, 'bazAction.pas');
+    readDefs  (vDefs, FILE_PATH_IN);
+    writeUnit (vDefs, FILE_PATH_IN);
+
+    var vResult := TAction<boolean>.pick(TRUE, test).perform('hello', TRUE);
 
 //    var vTestParts := 'LoadsASpaces:  boolean  string           '.split([' ']);
 //    var vTestParts := 'StringInteger: string integer'.split([':']);
