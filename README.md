@@ -1,5 +1,7 @@
 # bazActionGen
-generates bazAction.pas unit from simple bazActionDefs.txt
+generates bazAction.pas unit and descendants from a simple bazActionDefs.txt
+
+Towards a Fluent Interface / Finite State Machine programming world with no IFs or Case statements
 
 IAction/TAction allows, for example:
 
@@ -13,4 +15,16 @@ begin
 end;
 ...
   result := TAction<string>.pick(result <> EMPTY, mmpITBS).perform(result);
+```
+
+and
+
+```Delphi
+  
+function mmpDeleteTemp: boolean;
+begin
+  result := deleteFile(FTempFilePath);
+end;
+...
+  result := TAction<boolean>.pick(vExportedOK, mmpDeleteTemp).default(result).perform;
 ```
