@@ -28,3 +28,12 @@ end;
 ...
   result := TAction<boolean>.pick(vExportedOK, mmpDeleteTemp).default(result).perform;
 ```
+
+and
+
+```Delphi
+
+var vActionToPerform := TAction<TDateTime>.pick(isItTooLate, mmpFindTheTime);
+baz.cmd(vActionToPerform <> NIL, callThis(vActionToPerform);
+
+```
