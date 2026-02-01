@@ -40,6 +40,19 @@ end;
 ...
   result := TAction<boolean>.pick(vExportedOK, mmpDeleteTemp).default(result).perform(FTempFilePath);
 ```
+
+and
+
+```Delphi
+  
+function mmpDeleteTemp(const aFilePath: string): boolean;
+begin
+  result := deleteFile(aFilePath);
+end;
+...
+  TAction<boolean>.pick(vExportedOK, mmpDeleteTemp).perform(FTempFilePath);
+```
+
 and
 
 ```Delphi
