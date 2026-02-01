@@ -143,7 +143,7 @@ const
 begin
   aSL.add('  strict private');
   aSL.add('    FFuncAssigned: boolean;');
-  aSL.add('    FDefault:      TResult; // initialised in constructor, used in perform');
+  aSL.add('    FDefault:      TResult; // initialised by constructor, set by optional .default(), used in .perform()');
   aSL.add('');
 
   for var i := 0 to high(aDefs) do
@@ -379,7 +379,7 @@ begin
     begin
       case (aHeader = '') and (vLine.startsWith(':')) of TRUE:  begin
                                                                   vUnit := copy(vLine, 2, maxInt);
-                                                                  aSL.add(format('unit %s;', [vUnit]));
+                                                                  case aSL = NIL of FALSE: aSL.add(format('unit %s;', [vUnit])); end;
                                                                   BREAK; end;end;
 
       vCopying := vCopying and NOT vLine.startsWith('#');
@@ -398,10 +398,10 @@ procedure writeUnit(const aDefs: TDefs; const aFilePathIn: string);
 begin
   var vSL := TStringList.Create;
   try
-    copySection('#copyright', aFilePathIn, vSL);
-    copySection('',  aFilePathIn, vSL); // obtains vUnit and writes out the unit name
+    copySection('#' + vUnit + ' copyright', aFilePathIn, vSL);
+    copySection('',  aFilePathIn, vSL); // obtain vUnit and write out the unit name
     writeUnitHeader(vSL);
-    copySection('#uses',  aFilePathIn, vSL);
+    copySection('#' + vUnit + ' uses',  aFilePathIn, vSL);
     writeTypes(aDefs, vSL);
     writeInterface(aDefs, vSL); // interface definition, not the interface section header
     writeClassHeader(aDefs, vSL);
@@ -453,7 +453,7 @@ begin
   try
     vLines.loadFromFile(aFilePath);
 
-    var vStartIx := vLines.indexOf('#types') + 1;
+    var vStartIx := vLines.indexOf('#' + vUnit + ' types') + 1;
     setLength(aDefs, vLines.count - vStartIx);
 
     var vDefIx := -1;
@@ -523,6 +523,8 @@ end;
 begin
   try
     // testReadDefs('bazActionDefs.txt');
+
+    copySection('', FILE_PATH_IN, NIL); // obtain vUnit only
 
     readDefs  (vDefs, FILE_PATH_IN);
     writeUnit (vDefs, FILE_PATH_IN);

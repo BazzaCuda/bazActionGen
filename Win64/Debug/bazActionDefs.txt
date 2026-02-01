@@ -1,6 +1,6 @@
 :mmpAction
 
-#copyright
+#mmpAction copyright
 {   bazLib / bazAction
     Copyright (C) 2021-2099 Baz Cuda
     https://github.com/BazzaCuda/
@@ -19,7 +19,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307, USA
 }
-#uses
+#mmpAction uses
 uses
   bazAction;
   
@@ -34,5 +34,5 @@ Cardinal: cardinal
 StringString: string string
 StringBoolean: string boolean
 
-#types
+#mmpAction types
 BooleanString: boolean string

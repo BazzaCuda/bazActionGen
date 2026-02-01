@@ -45,7 +45,7 @@ type
   TAction<TResult> = class(bazAction.TAction<TResult>, bazAction.IAction<TResult>)
   strict private
     FFuncAssigned: boolean;
-    FDefault:      TResult; // initialised in constructor, used in perform
+    FDefault:      TResult; // initialised by constructor, set by optional .default(), used in .perform()
 
     FOFuncBooleanString:                TOFuncBooleanString                  <TResult>;
     FSFuncBooleanString:                TAFuncBooleanString                  <TResult>;
