@@ -1,6 +1,6 @@
-{   bazLib / bazAction
+{   MMP: Minimalist Media Player
     Copyright (C) 2021-2099 Baz Cuda
-    https://github.com/BazzaCuda/
+    https://github.com/BazzaCuda/MinimalistMediaPlayerX
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -62,9 +62,13 @@ type
     function getAssigned: boolean;
     function default(const aValue: TResult): IAction<TResult>;
 
-    class function pick(const aBoolean: boolean; const aTrueFuncBooleanString:      TOFuncBooleanString      <TResult>):           IAction<TResult>; overload;
-    class function pick(const aBoolean: boolean; const aTrueFuncBooleanString:      TSFuncBooleanString      <TResult>):           IAction<TResult>; overload;
-    class function pick(const aBoolean: boolean; const aTrueFuncBooleanString:      TAFuncBooleanString      <TResult>):           IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc:                   TOFuncBooleanString      <TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc:                   TSFuncBooleanString      <TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc:                   TAFuncBooleanString      <TResult>): IAction<TResult>; overload;
+
+    class function pick(const aBoolean: boolean; const aTrueFunc:                   TOFuncBooleanString<TResult>; const aFalseFunc: TOFuncBooleanString<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc:                   TSFuncBooleanString<TResult>; const aFalseFunc: TSFuncBooleanString<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc:                   TAFuncBooleanString<TResult>; const aFalseFunc: TAFuncBooleanString<TResult>): IAction<TResult>; overload;
 
     function perform(const aBoolean: boolean; const aString: string):            TResult; overload;
   end;
@@ -105,27 +109,51 @@ begin
   FFuncAssigned        := assigned(aFuncBooleanString);
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncBooleanString: TOFuncBooleanString<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TOFuncBooleanString<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := IAction<TResult>(pointer(TAction<TResult>.Create(aTrueFuncBooleanString)));
+     TRUE:  result := IAction<TResult>(pointer(TAction<TResult>.Create(aTrueFunc)));
     FALSE:  result := IAction<TResult>(pointer(TAction<TResult>.Create(NIL)));
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncBooleanString: TSFuncBooleanString<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TSFuncBooleanString<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := IAction<TResult>(pointer(TAction<TResult>.Create(aTrueFuncBooleanString)));
+     TRUE:  result := IAction<TResult>(pointer(TAction<TResult>.Create(aTrueFunc)));
     FALSE:  result := IAction<TResult>(pointer(TAction<TResult>.Create(NIL)));
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncBooleanString: TAFuncBooleanString<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TAFuncBooleanString<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := IAction<TResult>(pointer(TAction<TResult>.Create(aTrueFuncBooleanString)));
+     TRUE:  result := IAction<TResult>(pointer(TAction<TResult>.Create(aTrueFunc)));
     FALSE:  result := IAction<TResult>(pointer(TAction<TResult>.Create(NIL)));
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TOFuncBooleanString<TResult>; const aFalseFunc: TOFuncBooleanString<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := IAction<TResult>(pointer(TAction<TResult>.Create(aTrueFunc)));
+    FALSE:  result := IAction<TResult>(pointer(TAction<TResult>.Create(aFalseFunc)));
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TSFuncBooleanString<TResult>; const aFalseFunc: TSFuncBooleanString<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := IAction<TResult>(pointer(TAction<TResult>.Create(aTrueFunc)));
+    FALSE:  result := IAction<TResult>(pointer(TAction<TResult>.Create(aFalseFunc)));
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TAFuncBooleanString<TResult>; const aFalseFunc: TAFuncBooleanString<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := IAction<TResult>(pointer(TAction<TResult>.Create(aTrueFunc)));
+    FALSE:  result := IAction<TResult>(pointer(TAction<TResult>.Create(aFalseFunc)));
   end;
 end;
 

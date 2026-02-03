@@ -82,7 +82,7 @@ type
   TAction<TResult> = class(TInterfacedObject, IAction<TResult>)
   strict private
     FFuncAssigned: boolean;
-    FDefault:      TResult; // initialised in constructor, used in perform
+    FDefault:      TResult; // initialised by constructor, set by optional .default(), used in .perform()
 
     FOFuncNoParam:                      TOFuncNoParam                        <TResult>;
     FSFuncNoParam:                      TAFuncNoParam                        <TResult>;
@@ -163,41 +163,77 @@ type
     function getAssigned: boolean;
     function default(const aValue: TResult): IAction<TResult>;
 
-    class function pick(const aBoolean: boolean; const aTrueFuncNoParam:            TOFuncNoParam            <TResult>):           IAction<TResult>; overload;
-    class function pick(const aBoolean: boolean; const aTrueFuncNoParam:            TSFuncNoParam            <TResult>):           IAction<TResult>; overload;
-    class function pick(const aBoolean: boolean; const aTrueFuncNoParam:            TAFuncNoParam            <TResult>):           IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TOFuncNoParam<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TSFuncNoParam<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TAFuncNoParam<TResult>): IAction<TResult>; overload;
 
-    class function pick(const aBoolean: boolean; const aTrueFuncString:             TOFuncString             <TResult>):           IAction<TResult>; overload;
-    class function pick(const aBoolean: boolean; const aTrueFuncString:             TSFuncString             <TResult>):           IAction<TResult>; overload;
-    class function pick(const aBoolean: boolean; const aTrueFuncString:             TAFuncString             <TResult>):           IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TOFuncNoParam<TResult>; const aFalseFunc: TOFuncNoParam<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TSFuncNoParam<TResult>; const aFalseFunc: TSFuncNoParam<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TAFuncNoParam<TResult>; const aFalseFunc: TAFuncNoParam<TResult>): IAction<TResult>; overload;
 
-    class function pick(const aBoolean: boolean; const aTrueFuncInteger:            TOFuncInteger            <TResult>):           IAction<TResult>; overload;
-    class function pick(const aBoolean: boolean; const aTrueFuncInteger:            TSFuncInteger            <TResult>):           IAction<TResult>; overload;
-    class function pick(const aBoolean: boolean; const aTrueFuncInteger:            TAFuncInteger            <TResult>):           IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TOFuncString<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TSFuncString<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TAFuncString<TResult>): IAction<TResult>; overload;
 
-    class function pick(const aBoolean: boolean; const aTrueFuncStringInteger:      TOFuncStringInteger      <TResult>):           IAction<TResult>; overload;
-    class function pick(const aBoolean: boolean; const aTrueFuncStringInteger:      TSFuncStringInteger      <TResult>):           IAction<TResult>; overload;
-    class function pick(const aBoolean: boolean; const aTrueFuncStringInteger:      TAFuncStringInteger      <TResult>):           IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TOFuncString<TResult>; const aFalseFunc: TOFuncString<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TSFuncString<TResult>; const aFalseFunc: TSFuncString<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TAFuncString<TResult>; const aFalseFunc: TAFuncString<TResult>): IAction<TResult>; overload;
 
-    class function pick(const aBoolean: boolean; const aTrueFuncBoolean:            TOFuncBoolean            <TResult>):           IAction<TResult>; overload;
-    class function pick(const aBoolean: boolean; const aTrueFuncBoolean:            TSFuncBoolean            <TResult>):           IAction<TResult>; overload;
-    class function pick(const aBoolean: boolean; const aTrueFuncBoolean:            TAFuncBoolean            <TResult>):           IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TOFuncInteger<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TSFuncInteger<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TAFuncInteger<TResult>): IAction<TResult>; overload;
 
-    class function pick(const aBoolean: boolean; const aTrueFuncWord:               TOFuncWord               <TResult>):           IAction<TResult>; overload;
-    class function pick(const aBoolean: boolean; const aTrueFuncWord:               TSFuncWord               <TResult>):           IAction<TResult>; overload;
-    class function pick(const aBoolean: boolean; const aTrueFuncWord:               TAFuncWord               <TResult>):           IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TOFuncInteger<TResult>; const aFalseFunc: TOFuncInteger<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TSFuncInteger<TResult>; const aFalseFunc: TSFuncInteger<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TAFuncInteger<TResult>; const aFalseFunc: TAFuncInteger<TResult>): IAction<TResult>; overload;
 
-    class function pick(const aBoolean: boolean; const aTrueFuncCardinal:           TOFuncCardinal           <TResult>):           IAction<TResult>; overload;
-    class function pick(const aBoolean: boolean; const aTrueFuncCardinal:           TSFuncCardinal           <TResult>):           IAction<TResult>; overload;
-    class function pick(const aBoolean: boolean; const aTrueFuncCardinal:           TAFuncCardinal           <TResult>):           IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TOFuncStringInteger<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TSFuncStringInteger<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TAFuncStringInteger<TResult>): IAction<TResult>; overload;
 
-    class function pick(const aBoolean: boolean; const aTrueFuncStringString:       TOFuncStringString       <TResult>):           IAction<TResult>; overload;
-    class function pick(const aBoolean: boolean; const aTrueFuncStringString:       TSFuncStringString       <TResult>):           IAction<TResult>; overload;
-    class function pick(const aBoolean: boolean; const aTrueFuncStringString:       TAFuncStringString       <TResult>):           IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TOFuncStringInteger<TResult>; const aFalseFunc: TOFuncStringInteger<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TSFuncStringInteger<TResult>; const aFalseFunc: TSFuncStringInteger<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TAFuncStringInteger<TResult>; const aFalseFunc: TAFuncStringInteger<TResult>): IAction<TResult>; overload;
 
-    class function pick(const aBoolean: boolean; const aTrueFuncStringBoolean:      TOFuncStringBoolean      <TResult>):           IAction<TResult>; overload;
-    class function pick(const aBoolean: boolean; const aTrueFuncStringBoolean:      TSFuncStringBoolean      <TResult>):           IAction<TResult>; overload;
-    class function pick(const aBoolean: boolean; const aTrueFuncStringBoolean:      TAFuncStringBoolean      <TResult>):           IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TOFuncBoolean<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TSFuncBoolean<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TAFuncBoolean<TResult>): IAction<TResult>; overload;
+
+    class function pick(const aBoolean: boolean; const aTrueFunc: TOFuncBoolean<TResult>; const aFalseFunc: TOFuncBoolean<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TSFuncBoolean<TResult>; const aFalseFunc: TSFuncBoolean<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TAFuncBoolean<TResult>; const aFalseFunc: TAFuncBoolean<TResult>): IAction<TResult>; overload;
+
+    class function pick(const aBoolean: boolean; const aTrueFunc: TOFuncWord<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TSFuncWord<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TAFuncWord<TResult>): IAction<TResult>; overload;
+
+    class function pick(const aBoolean: boolean; const aTrueFunc: TOFuncWord<TResult>; const aFalseFunc: TOFuncWord<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TSFuncWord<TResult>; const aFalseFunc: TSFuncWord<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TAFuncWord<TResult>; const aFalseFunc: TAFuncWord<TResult>): IAction<TResult>; overload;
+
+    class function pick(const aBoolean: boolean; const aTrueFunc: TOFuncCardinal<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TSFuncCardinal<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TAFuncCardinal<TResult>): IAction<TResult>; overload;
+
+    class function pick(const aBoolean: boolean; const aTrueFunc: TOFuncCardinal<TResult>; const aFalseFunc: TOFuncCardinal<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TSFuncCardinal<TResult>; const aFalseFunc: TSFuncCardinal<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TAFuncCardinal<TResult>; const aFalseFunc: TAFuncCardinal<TResult>): IAction<TResult>; overload;
+
+    class function pick(const aBoolean: boolean; const aTrueFunc: TOFuncStringString<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TSFuncStringString<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TAFuncStringString<TResult>): IAction<TResult>; overload;
+
+    class function pick(const aBoolean: boolean; const aTrueFunc: TOFuncStringString<TResult>; const aFalseFunc: TOFuncStringString<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TSFuncStringString<TResult>; const aFalseFunc: TSFuncStringString<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TAFuncStringString<TResult>; const aFalseFunc: TAFuncStringString<TResult>): IAction<TResult>; overload;
+
+    class function pick(const aBoolean: boolean; const aTrueFunc: TOFuncStringBoolean<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TSFuncStringBoolean<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TAFuncStringBoolean<TResult>): IAction<TResult>; overload;
+
+    class function pick(const aBoolean: boolean; const aTrueFunc: TOFuncStringBoolean<TResult>; const aFalseFunc: TOFuncStringBoolean<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TSFuncStringBoolean<TResult>; const aFalseFunc: TSFuncStringBoolean<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TAFuncStringBoolean<TResult>; const aFalseFunc: TAFuncStringBoolean<TResult>): IAction<TResult>; overload;
 
     function perform():                                                          TResult; overload;
     function perform(const aString: string):                                     TResult; overload;
@@ -390,219 +426,435 @@ begin
   FFuncAssigned        := assigned(aFuncStringBoolean);
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncNoParam: TOFuncNoParam<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TOFuncNoParam<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncNoParam);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncNoParam: TSFuncNoParam<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TSFuncNoParam<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncNoParam);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncNoParam: TAFuncNoParam<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TAFuncNoParam<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncNoParam);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncString: TOFuncString<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TOFuncString<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncString);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncString: TSFuncString<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TSFuncString<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncString);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncString: TAFuncString<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TAFuncString<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncString);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncInteger: TOFuncInteger<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TOFuncInteger<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncInteger);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncInteger: TSFuncInteger<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TSFuncInteger<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncInteger);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncInteger: TAFuncInteger<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TAFuncInteger<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncInteger);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncStringInteger: TOFuncStringInteger<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TOFuncStringInteger<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncStringInteger);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncStringInteger: TSFuncStringInteger<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TSFuncStringInteger<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncStringInteger);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncStringInteger: TAFuncStringInteger<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TAFuncStringInteger<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncStringInteger);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncBoolean: TOFuncBoolean<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TOFuncBoolean<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncBoolean);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncBoolean: TSFuncBoolean<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TSFuncBoolean<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncBoolean);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncBoolean: TAFuncBoolean<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TAFuncBoolean<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncBoolean);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncWord: TOFuncWord<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TOFuncWord<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncWord);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncWord: TSFuncWord<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TSFuncWord<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncWord);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncWord: TAFuncWord<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TAFuncWord<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncWord);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncCardinal: TOFuncCardinal<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TOFuncCardinal<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncCardinal);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncCardinal: TSFuncCardinal<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TSFuncCardinal<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncCardinal);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncCardinal: TAFuncCardinal<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TAFuncCardinal<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncCardinal);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncStringString: TOFuncStringString<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TOFuncStringString<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncStringString);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncStringString: TSFuncStringString<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TSFuncStringString<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncStringString);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncStringString: TAFuncStringString<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TAFuncStringString<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncStringString);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncStringBoolean: TOFuncStringBoolean<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TOFuncStringBoolean<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncStringBoolean);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncStringBoolean: TSFuncStringBoolean<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TSFuncStringBoolean<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncStringBoolean);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
   end;
 end;
 
-class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFuncStringBoolean: TAFuncStringBoolean<TResult>): IAction<TResult>;
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TAFuncStringBoolean<TResult>): IAction<TResult>;
 begin
   case aBoolean of
-     TRUE:  result := TAction<TResult>.Create(aTrueFuncStringBoolean);
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
     FALSE:  result := TAction<TResult>.Create(NIL);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TOFuncNoParam<TResult>; const aFalseFunc: TOFuncNoParam<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TSFuncNoParam<TResult>; const aFalseFunc: TSFuncNoParam<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TAFuncNoParam<TResult>; const aFalseFunc: TAFuncNoParam<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TOFuncString<TResult>; const aFalseFunc: TOFuncString<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TSFuncString<TResult>; const aFalseFunc: TSFuncString<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TAFuncString<TResult>; const aFalseFunc: TAFuncString<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TOFuncInteger<TResult>; const aFalseFunc: TOFuncInteger<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TSFuncInteger<TResult>; const aFalseFunc: TSFuncInteger<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TAFuncInteger<TResult>; const aFalseFunc: TAFuncInteger<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TOFuncStringInteger<TResult>; const aFalseFunc: TOFuncStringInteger<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TSFuncStringInteger<TResult>; const aFalseFunc: TSFuncStringInteger<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TAFuncStringInteger<TResult>; const aFalseFunc: TAFuncStringInteger<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TOFuncBoolean<TResult>; const aFalseFunc: TOFuncBoolean<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TSFuncBoolean<TResult>; const aFalseFunc: TSFuncBoolean<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TAFuncBoolean<TResult>; const aFalseFunc: TAFuncBoolean<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TOFuncWord<TResult>; const aFalseFunc: TOFuncWord<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TSFuncWord<TResult>; const aFalseFunc: TSFuncWord<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TAFuncWord<TResult>; const aFalseFunc: TAFuncWord<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TOFuncCardinal<TResult>; const aFalseFunc: TOFuncCardinal<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TSFuncCardinal<TResult>; const aFalseFunc: TSFuncCardinal<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TAFuncCardinal<TResult>; const aFalseFunc: TAFuncCardinal<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TOFuncStringString<TResult>; const aFalseFunc: TOFuncStringString<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TSFuncStringString<TResult>; const aFalseFunc: TSFuncStringString<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TAFuncStringString<TResult>; const aFalseFunc: TAFuncStringString<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TOFuncStringBoolean<TResult>; const aFalseFunc: TOFuncStringBoolean<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TSFuncStringBoolean<TResult>; const aFalseFunc: TSFuncStringBoolean<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
+  end;
+end;
+
+class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TAFuncStringBoolean<TResult>; const aFalseFunc: TAFuncStringBoolean<TResult>): IAction<TResult>;
+begin
+  case aBoolean of
+     TRUE:  result := TAction<TResult>.Create(aTrueFunc);
+    FALSE:  result := TAction<TResult>.Create(aFalseFunc);
   end;
 end;
 

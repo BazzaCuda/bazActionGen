@@ -177,8 +177,8 @@ end;
 
 procedure writeClassPicks(const aDefs: TDefs; const aSL: TStringList);
 const
-  WIDTH_PARAM_NAME  = 60;
-  WIDTH_FUNC_TYPE   = 25;
+  WIDTH_PARAM_NAME  = 1;
+  WIDTH_FUNC_TYPE   = 2;
 begin
   aSL.add('  public');
   aSL.add('    function getAssigned: boolean;');
@@ -187,9 +187,13 @@ begin
 
   for var i := 0 to high(aDefs) do
   begin
-    aSL.add(format('    class function pick(%-*s%-*s<TResult>):           IAction<TResult>; overload;', [WIDTH_PARAM_NAME, 'const aBoolean: boolean; const aTrueFunc' + aDefs[i].suffix + ':', WIDTH_FUNC_TYPE, 'TOFunc' + aDefs[i].suffix]));
-    aSL.add(format('    class function pick(%-*s%-*s<TResult>):           IAction<TResult>; overload;', [WIDTH_PARAM_NAME, 'const aBoolean: boolean; const aTrueFunc' + aDefs[i].suffix + ':', WIDTH_FUNC_TYPE, 'TSFunc' + aDefs[i].suffix]));
-    aSL.add(format('    class function pick(%-*s%-*s<TResult>):           IAction<TResult>; overload;', [WIDTH_PARAM_NAME, 'const aBoolean: boolean; const aTrueFunc' + aDefs[i].suffix + ':', WIDTH_FUNC_TYPE, 'TAFunc' + aDefs[i].suffix]));
+    aSL.add(format('    class function pick(%-*s%-*s<TResult>): IAction<TResult>; overload;', [WIDTH_PARAM_NAME, 'const aBoolean: boolean; const aTrueFunc' + ': ', WIDTH_FUNC_TYPE, 'TOFunc' + aDefs[i].suffix]));
+    aSL.add(format('    class function pick(%-*s%-*s<TResult>): IAction<TResult>; overload;', [WIDTH_PARAM_NAME, 'const aBoolean: boolean; const aTrueFunc' + ': ', WIDTH_FUNC_TYPE, 'TSFunc' + aDefs[i].suffix]));
+    aSL.add(format('    class function pick(%-*s%-*s<TResult>): IAction<TResult>; overload;', [WIDTH_PARAM_NAME, 'const aBoolean: boolean; const aTrueFunc' + ': ', WIDTH_FUNC_TYPE, 'TAFunc' + aDefs[i].suffix]));
+    aSL.add('');
+    aSL.add(format('    class function pick(%-*s%-*s<TResult>): IAction<TResult>; overload;', [WIDTH_PARAM_NAME, 'const aBoolean: boolean; const aTrueFunc' + ': ', WIDTH_FUNC_TYPE, 'TOFunc' + aDefs[i].suffix + '<TResult>; const aFalseFunc' + ': TOFunc' + aDefs[i].suffix]));
+    aSL.add(format('    class function pick(%-*s%-*s<TResult>): IAction<TResult>; overload;', [WIDTH_PARAM_NAME, 'const aBoolean: boolean; const aTrueFunc' + ': ', WIDTH_FUNC_TYPE, 'TSFunc' + aDefs[i].suffix + '<TResult>; const aFalseFunc' + ': TSFunc' + aDefs[i].suffix]));
+    aSL.add(format('    class function pick(%-*s%-*s<TResult>): IAction<TResult>; overload;', [WIDTH_PARAM_NAME, 'const aBoolean: boolean; const aTrueFunc' + ': ', WIDTH_FUNC_TYPE, 'TAFunc' + aDefs[i].suffix + '<TResult>; const aFalseFunc' + ': TAFunc' + aDefs[i].suffix]));
     aSL.add('');
   end;
 end;
@@ -294,11 +298,11 @@ begin
   end;
 end;
 
-procedure writePicks(const aDefs: TDefs; const aSL: TStringList);
+procedure writePicksTrueFunc(const aDefs: TDefs; const aSL: TStringList);
 begin
   for var i := 0 to high(aDefs) do
   begin
-    aSL.add(format('class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc%s: TOFunc%s<TResult>): IAction<TResult>;', [aDefs[i].suffix, aDefs[i].suffix]));
+    aSL.add(format('class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TOFunc%s<TResult>): IAction<TResult>;', [aDefs[i].suffix]));
     aSL.add('begin');
     aSL.add('  case aBoolean of');
 
@@ -307,26 +311,65 @@ begin
     case vUnit = BAZ_ACTION_UNIT of FALSE: vPointerPrefix := 'IAction<TResult>(pointer('; end;
     case vUnit = BAZ_ACTION_UNIT of FALSE: vPointerSuffix := '))'; end;
 
-    aSL.add(format('     TRUE:  result := %sTAction<TResult>.Create(aTrueFunc%s)%s;', [vPointerPrefix, aDefs[i].suffix, vPointerSuffix]));
+    aSL.add(format('     TRUE:  result := %sTAction<TResult>.Create(aTrueFunc)%s;', [vPointerPrefix, vPointerSuffix]));
     aSL.add(format('    FALSE:  result := %sTAction<TResult>.Create(NIL)%s;', [vPointerPrefix, vPointerSuffix]));
     aSL.add('  end;');
     aSL.add('end;');
     aSL.add('');
 
-    aSL.add(format('class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc%s: TSFunc%s<TResult>): IAction<TResult>;', [aDefs[i].suffix, aDefs[i].suffix]));
+    aSL.add(format('class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TSFunc%s<TResult>): IAction<TResult>;', [aDefs[i].suffix]));
     aSL.add('begin');
     aSL.add('  case aBoolean of');
-    aSL.add(format('     TRUE:  result := %sTAction<TResult>.Create(aTrueFunc%s)%s;', [vPointerPrefix, aDefs[i].suffix, vPointerSuffix]));
+    aSL.add(format('     TRUE:  result := %sTAction<TResult>.Create(aTrueFunc)%s;', [vPointerPrefix, vPointerSuffix]));
     aSL.add(format('    FALSE:  result := %sTAction<TResult>.Create(NIL)%s;', [vPointerPrefix, vPointerSuffix]));
     aSL.add('  end;');
     aSL.add('end;');
     aSL.add('');
 
-    aSL.add(format('class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc%s: TAFunc%s<TResult>): IAction<TResult>;', [aDefs[i].suffix, aDefs[i].suffix]));
+    aSL.add(format('class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TAFunc%s<TResult>): IAction<TResult>;', [aDefs[i].suffix]));
     aSL.add('begin');
     aSL.add('  case aBoolean of');
-    aSL.add(format('     TRUE:  result := %sTAction<TResult>.Create(aTrueFunc%s)%s;', [vPointerPrefix, aDefs[i].suffix, vPointerSuffix]));
+    aSL.add(format('     TRUE:  result := %sTAction<TResult>.Create(aTrueFunc)%s;', [vPointerPrefix, vPointerSuffix]));
     aSL.add(format('    FALSE:  result := %sTAction<TResult>.Create(NIL)%s;', [vPointerPrefix, vPointerSuffix]));
+    aSL.add('  end;');
+    aSL.add('end;');
+    aSL.add('');
+  end;
+end;
+
+procedure writePicksTrueFalseFunc(const aDefs: TDefs; const aSL: TStringList);
+begin
+  for var i := 0 to high(aDefs) do
+  begin
+    aSL.add(format('class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TOFunc%s<TResult>; const aFalseFunc: TOFunc%s<TResult>): IAction<TResult>;', [aDefs[i].suffix, aDefs[i].suffix]));
+    aSL.add('begin');
+    aSL.add('  case aBoolean of');
+
+    var vPointerPrefix: string := '';
+    var vPointerSuffix: string := '';
+    case vUnit = BAZ_ACTION_UNIT of FALSE: vPointerPrefix := 'IAction<TResult>(pointer('; end;
+    case vUnit = BAZ_ACTION_UNIT of FALSE: vPointerSuffix := '))'; end;
+
+    aSL.add(format('     TRUE:  result := %sTAction<TResult>.Create(aTrueFunc)%s;', [vPointerPrefix, vPointerSuffix]));
+    aSL.add(format('    FALSE:  result := %sTAction<TResult>.Create(aFalseFunc)%s;', [vPointerPrefix, vPointerSuffix]));
+    aSL.add('  end;');
+    aSL.add('end;');
+    aSL.add('');
+
+    aSL.add(format('class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TSFunc%s<TResult>; const aFalseFunc: TSFunc%s<TResult>): IAction<TResult>;', [aDefs[i].suffix, aDefs[i].suffix]));
+    aSL.add('begin');
+    aSL.add('  case aBoolean of');
+    aSL.add(format('     TRUE:  result := %sTAction<TResult>.Create(aTrueFunc)%s;', [vPointerPrefix, vPointerSuffix]));
+    aSL.add(format('    FALSE:  result := %sTAction<TResult>.Create(aFalseFunc)%s;', [vPointerPrefix, vPointerSuffix]));
+    aSL.add('  end;');
+    aSL.add('end;');
+    aSL.add('');
+
+    aSL.add(format('class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TAFunc%s<TResult>; const aFalseFunc: TAFunc%s<TResult>): IAction<TResult>;', [aDefs[i].suffix, aDefs[i].suffix]));
+    aSL.add('begin');
+    aSL.add('  case aBoolean of');
+    aSL.add(format('     TRUE:  result := %sTAction<TResult>.Create(aTrueFunc)%s;', [vPointerPrefix, vPointerSuffix]));
+    aSL.add(format('    FALSE:  result := %sTAction<TResult>.Create(aFalseFunc)%s;', [vPointerPrefix, vPointerSuffix]));
     aSL.add('  end;');
     aSL.add('end;');
     aSL.add('');
@@ -412,7 +455,8 @@ begin
     writeImplementationHeader(vSL);
     writeConstructorsFixed(aDefs, vSL);
     writeConstructors(aDefs, vSL);
-    writePicks(aDefs, vSL);;
+    writePicksTrueFunc(aDefs, vSL);
+    writePicksTrueFalseFunc(aDefs, vSL);
     writePerforms(aDefs, vSL);
     vSL.saveToFile(vUnit + '.pas');
   finally
@@ -453,12 +497,18 @@ begin
   try
     vLines.loadFromFile(aFilePath);
 
-    var vStartIx := vLines.indexOf('#' + vUnit + ' types') + 1;
-    setLength(aDefs, vLines.count - vStartIx);
+    var vStartIx  := vLines.indexOf('#' + vUnit + ' types') + 1;
+    var vEndIx    := vLines.count - 1;
+    for var i := vStartIx to vLines.count - 1 do begin
+      case vLines[i].startsWith('#') of TRUE: begin
+                                                vEndIx := i - 1;
+                                                BREAK; end;end;
+    end;
+    setLength(aDefs, vEndIx - vStartIx);
 
     var vDefIx := -1;
 
-    for var i := vStartIx to vLines.count - 1 do
+    for var i := vStartIx to vEndIx do
     begin
       var vLine := trim(vLines[i]);
 
@@ -529,7 +579,7 @@ begin
     readDefs  (vDefs, FILE_PATH_IN);
     writeUnit (vDefs, FILE_PATH_IN);
 
-    var vResult := TAction<boolean>.pick(TRUE, test).perform('hello', TRUE);
+    //var vResult := TAction<boolean>.pick(TRUE, test).perform('hello', TRUE);
 
 //    var vTestParts := 'LoadsASpaces:  boolean  string           '.split([' ']);
 //    var vTestParts := 'StringInteger: string integer'.split([':']);
