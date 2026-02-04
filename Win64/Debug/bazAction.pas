@@ -103,6 +103,7 @@ type
   IAction<TResult> = interface
     function default(const aValue: TResult): IAction<TResult>; // the fallback value
     function getDefault: TResult;
+    function ensure(const aBoolean: boolean): IAction<TResult>;
 
     function perform(): TResult; overload;
     function perform(const aString: string): TResult; overload;
@@ -158,41 +159,41 @@ type
     function andThen(const aGuardClause: boolean; const aTrueFunc: TSFuncStringBoolean<TResult>; const aString: string; const aBoolean: boolean): IAction<TResult>; overload;
     function andThen(const aGuardClause: boolean; const aTrueFunc: TAFuncStringBoolean<TResult>; const aString: string; const aBoolean: boolean): IAction<TResult>; overload;
 
-    function plus(const aGuardClause: boolean; const aTrueFunc: TOFuncNoParam<TResult>): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TSFuncNoParam<TResult>): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TAFuncNoParam<TResult>): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TOFuncNoParam<TResult>): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TSFuncNoParam<TResult>): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TAFuncNoParam<TResult>): IAction<TResult>; overload;
 
-    function plus(const aGuardClause: boolean; const aTrueFunc: TOFuncString<TResult>; const aString: string): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TSFuncString<TResult>; const aString: string): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TAFuncString<TResult>; const aString: string): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TOFuncString<TResult>; const aString: string): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TSFuncString<TResult>; const aString: string): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TAFuncString<TResult>; const aString: string): IAction<TResult>; overload;
 
-    function plus(const aGuardClause: boolean; const aTrueFunc: TOFuncInteger<TResult>; const aInteger: integer): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TSFuncInteger<TResult>; const aInteger: integer): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TAFuncInteger<TResult>; const aInteger: integer): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TOFuncInteger<TResult>; const aInteger: integer): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TSFuncInteger<TResult>; const aInteger: integer): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TAFuncInteger<TResult>; const aInteger: integer): IAction<TResult>; overload;
 
-    function plus(const aGuardClause: boolean; const aTrueFunc: TOFuncStringInteger<TResult>; const aString: string; const aInteger: integer): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TSFuncStringInteger<TResult>; const aString: string; const aInteger: integer): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TAFuncStringInteger<TResult>; const aString: string; const aInteger: integer): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TOFuncStringInteger<TResult>; const aString: string; const aInteger: integer): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TSFuncStringInteger<TResult>; const aString: string; const aInteger: integer): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TAFuncStringInteger<TResult>; const aString: string; const aInteger: integer): IAction<TResult>; overload;
 
-    function plus(const aGuardClause: boolean; const aTrueFunc: TOFuncBoolean<TResult>; const aBoolean: boolean): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TSFuncBoolean<TResult>; const aBoolean: boolean): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TAFuncBoolean<TResult>; const aBoolean: boolean): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TOFuncBoolean<TResult>; const aBoolean: boolean): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TSFuncBoolean<TResult>; const aBoolean: boolean): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TAFuncBoolean<TResult>; const aBoolean: boolean): IAction<TResult>; overload;
 
-    function plus(const aGuardClause: boolean; const aTrueFunc: TOFuncWord<TResult>; const aWORD: WORD): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TSFuncWord<TResult>; const aWORD: WORD): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TAFuncWord<TResult>; const aWORD: WORD): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TOFuncWord<TResult>; const aWORD: WORD): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TSFuncWord<TResult>; const aWORD: WORD): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TAFuncWord<TResult>; const aWORD: WORD): IAction<TResult>; overload;
 
-    function plus(const aGuardClause: boolean; const aTrueFunc: TOFuncCardinal<TResult>; const aCardinal: cardinal): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TSFuncCardinal<TResult>; const aCardinal: cardinal): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TAFuncCardinal<TResult>; const aCardinal: cardinal): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TOFuncCardinal<TResult>; const aCardinal: cardinal): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TSFuncCardinal<TResult>; const aCardinal: cardinal): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TAFuncCardinal<TResult>; const aCardinal: cardinal): IAction<TResult>; overload;
 
-    function plus(const aGuardClause: boolean; const aTrueFunc: TOFuncStringString<TResult>; const aString1: string; const aString2: string): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TSFuncStringString<TResult>; const aString1: string; const aString2: string): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TAFuncStringString<TResult>; const aString1: string; const aString2: string): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TOFuncStringString<TResult>; const aString1: string; const aString2: string): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TSFuncStringString<TResult>; const aString1: string; const aString2: string): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TAFuncStringString<TResult>; const aString1: string; const aString2: string): IAction<TResult>; overload;
 
-    function plus(const aGuardClause: boolean; const aTrueFunc: TOFuncStringBoolean<TResult>; const aString: string; const aBoolean: boolean): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TSFuncStringBoolean<TResult>; const aString: string; const aBoolean: boolean): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TAFuncStringBoolean<TResult>; const aString: string; const aBoolean: boolean): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TOFuncStringBoolean<TResult>; const aString: string; const aBoolean: boolean): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TSFuncStringBoolean<TResult>; const aString: string; const aBoolean: boolean): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TAFuncStringBoolean<TResult>; const aString: string; const aBoolean: boolean): IAction<TResult>; overload;
 
     function thenFinish: boolean;
   end;
@@ -284,6 +285,7 @@ type
     procedure setSuccess(const aValue: boolean);
     function  default(const aValue: TResult): IAction<TResult>;
     function  getDefault: TResult;
+    function ensure(const aBoolean: boolean): IAction<TResult>;
 
     class function pick(const aBoolean: boolean; const aTrueFunc: TOFuncNoParam<TResult>): IAction<TResult>; overload;
     class function pick(const aBoolean: boolean; const aTrueFunc: TSFuncNoParam<TResult>): IAction<TResult>; overload;
@@ -405,41 +407,41 @@ type
     function andThen(const aGuardClause: boolean; const aTrueFunc: TSFuncStringBoolean<TResult>; const aString: string; const aBoolean: boolean): IAction<TResult>; overload;
     function andThen(const aGuardClause: boolean; const aTrueFunc: TAFuncStringBoolean<TResult>; const aString: string; const aBoolean: boolean): IAction<TResult>; overload;
 
-    function plus(const aGuardClause: boolean; const aTrueFunc: TOFuncNoParam<TResult>): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TSFuncNoParam<TResult>): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TAFuncNoParam<TResult>): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TOFuncNoParam<TResult>): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TSFuncNoParam<TResult>): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TAFuncNoParam<TResult>): IAction<TResult>; overload;
 
-    function plus(const aGuardClause: boolean; const aTrueFunc: TOFuncString<TResult>; const aString: string): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TSFuncString<TResult>; const aString: string): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TAFuncString<TResult>; const aString: string): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TOFuncString<TResult>; const aString: string): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TSFuncString<TResult>; const aString: string): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TAFuncString<TResult>; const aString: string): IAction<TResult>; overload;
 
-    function plus(const aGuardClause: boolean; const aTrueFunc: TOFuncInteger<TResult>; const aInteger: integer): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TSFuncInteger<TResult>; const aInteger: integer): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TAFuncInteger<TResult>; const aInteger: integer): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TOFuncInteger<TResult>; const aInteger: integer): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TSFuncInteger<TResult>; const aInteger: integer): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TAFuncInteger<TResult>; const aInteger: integer): IAction<TResult>; overload;
 
-    function plus(const aGuardClause: boolean; const aTrueFunc: TOFuncStringInteger<TResult>; const aString: string; const aInteger: integer): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TSFuncStringInteger<TResult>; const aString: string; const aInteger: integer): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TAFuncStringInteger<TResult>; const aString: string; const aInteger: integer): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TOFuncStringInteger<TResult>; const aString: string; const aInteger: integer): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TSFuncStringInteger<TResult>; const aString: string; const aInteger: integer): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TAFuncStringInteger<TResult>; const aString: string; const aInteger: integer): IAction<TResult>; overload;
 
-    function plus(const aGuardClause: boolean; const aTrueFunc: TOFuncBoolean<TResult>; const aBoolean: boolean): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TSFuncBoolean<TResult>; const aBoolean: boolean): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TAFuncBoolean<TResult>; const aBoolean: boolean): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TOFuncBoolean<TResult>; const aBoolean: boolean): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TSFuncBoolean<TResult>; const aBoolean: boolean): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TAFuncBoolean<TResult>; const aBoolean: boolean): IAction<TResult>; overload;
 
-    function plus(const aGuardClause: boolean; const aTrueFunc: TOFuncWord<TResult>; const aWORD: WORD): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TSFuncWord<TResult>; const aWORD: WORD): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TAFuncWord<TResult>; const aWORD: WORD): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TOFuncWord<TResult>; const aWORD: WORD): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TSFuncWord<TResult>; const aWORD: WORD): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TAFuncWord<TResult>; const aWORD: WORD): IAction<TResult>; overload;
 
-    function plus(const aGuardClause: boolean; const aTrueFunc: TOFuncCardinal<TResult>; const aCardinal: cardinal): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TSFuncCardinal<TResult>; const aCardinal: cardinal): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TAFuncCardinal<TResult>; const aCardinal: cardinal): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TOFuncCardinal<TResult>; const aCardinal: cardinal): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TSFuncCardinal<TResult>; const aCardinal: cardinal): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TAFuncCardinal<TResult>; const aCardinal: cardinal): IAction<TResult>; overload;
 
-    function plus(const aGuardClause: boolean; const aTrueFunc: TOFuncStringString<TResult>; const aString1: string; const aString2: string): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TSFuncStringString<TResult>; const aString1: string; const aString2: string): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TAFuncStringString<TResult>; const aString1: string; const aString2: string): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TOFuncStringString<TResult>; const aString1: string; const aString2: string): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TSFuncStringString<TResult>; const aString1: string; const aString2: string): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TAFuncStringString<TResult>; const aString1: string; const aString2: string): IAction<TResult>; overload;
 
-    function plus(const aGuardClause: boolean; const aTrueFunc: TOFuncStringBoolean<TResult>; const aString: string; const aBoolean: boolean): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TSFuncStringBoolean<TResult>; const aString: string; const aBoolean: boolean): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TAFuncStringBoolean<TResult>; const aString: string; const aBoolean: boolean): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TOFuncStringBoolean<TResult>; const aString: string; const aBoolean: boolean): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TSFuncStringBoolean<TResult>; const aString: string; const aBoolean: boolean): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TAFuncStringBoolean<TResult>; const aString: string; const aBoolean: boolean): IAction<TResult>; overload;
 
     function thenFinish: boolean;
 
@@ -448,6 +450,7 @@ type
   end;
 
   IAction = interface
+
     procedure perform(); overload;
     procedure perform(const aString: string); overload;
     procedure perform(const aInteger: integer); overload;
@@ -1262,6 +1265,13 @@ function TAction<TResult>.getDefault: TResult;
 begin
   result := FDefault
 end;
+
+function TAction<TResult>.ensure(const aBoolean: boolean): IAction<TResult>;
+begin
+  success := success and aBoolean;
+  result := SELF;
+end;
+
 function TAction<TResult>.perform(): TResult;
 begin
   result := getDefault;
@@ -1269,6 +1279,7 @@ begin
   case assigned(FSFuncNoParam) of TRUE: EXIT(FSFuncNoParam()); end;
   case assigned(FAFuncNoParam) of TRUE: EXIT(FAFuncNoParam()); end;
 end;
+
 
 function TAction<TResult>.perform(const aString: string): TResult;
 begin
@@ -1278,6 +1289,7 @@ begin
   case assigned(FAFuncString) of TRUE: EXIT(FAFuncString(aString)); end;
 end;
 
+
 function TAction<TResult>.perform(const aInteger: integer): TResult;
 begin
   result := getDefault;
@@ -1285,6 +1297,7 @@ begin
   case assigned(FSFuncInteger) of TRUE: EXIT(FSFuncInteger(aInteger)); end;
   case assigned(FAFuncInteger) of TRUE: EXIT(FAFuncInteger(aInteger)); end;
 end;
+
 
 function TAction<TResult>.perform(const aString: string; const aInteger: integer): TResult;
 begin
@@ -1294,6 +1307,7 @@ begin
   case assigned(FAFuncStringInteger) of TRUE: EXIT(FAFuncStringInteger(aString, aInteger)); end;
 end;
 
+
 function TAction<TResult>.perform(const aBoolean: boolean): TResult;
 begin
   result := getDefault;
@@ -1301,6 +1315,7 @@ begin
   case assigned(FSFuncBoolean) of TRUE: EXIT(FSFuncBoolean(aBoolean)); end;
   case assigned(FAFuncBoolean) of TRUE: EXIT(FAFuncBoolean(aBoolean)); end;
 end;
+
 
 function TAction<TResult>.perform(const aWORD: WORD): TResult;
 begin
@@ -1310,6 +1325,7 @@ begin
   case assigned(FAFuncWord) of TRUE: EXIT(FAFuncWord(aWORD)); end;
 end;
 
+
 function TAction<TResult>.perform(const aCardinal: cardinal): TResult;
 begin
   result := getDefault;
@@ -1318,6 +1334,7 @@ begin
   case assigned(FAFuncCardinal) of TRUE: EXIT(FAFuncCardinal(aCardinal)); end;
 end;
 
+
 function TAction<TResult>.perform(const aString1: string; const aString2: string): TResult;
 begin
   result := getDefault;
@@ -1325,6 +1342,7 @@ begin
   case assigned(FSFuncStringString) of TRUE: EXIT(FSFuncStringString(aString1, aString2)); end;
   case assigned(FAFuncStringString) of TRUE: EXIT(FAFuncStringString(aString1, aString2)); end;
 end;
+
 
 function TAction<TResult>.perform(const aString: string; const aBoolean: boolean): TResult;
 begin
@@ -1632,163 +1650,163 @@ begin
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TOFuncNoParam<TResult>): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TOFuncNoParam<TResult>): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TSFuncNoParam<TResult>): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TSFuncNoParam<TResult>): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TAFuncNoParam<TResult>): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TAFuncNoParam<TResult>): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TOFuncString<TResult>; const aString: string): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TOFuncString<TResult>; const aString: string): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aString); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TSFuncString<TResult>; const aString: string): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TSFuncString<TResult>; const aString: string): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aString); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TAFuncString<TResult>; const aString: string): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TAFuncString<TResult>; const aString: string): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aString); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TOFuncInteger<TResult>; const aInteger: integer): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TOFuncInteger<TResult>; const aInteger: integer): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aInteger); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TSFuncInteger<TResult>; const aInteger: integer): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TSFuncInteger<TResult>; const aInteger: integer): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aInteger); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TAFuncInteger<TResult>; const aInteger: integer): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TAFuncInteger<TResult>; const aInteger: integer): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aInteger); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TOFuncStringInteger<TResult>; const aString: string; const aInteger: integer): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TOFuncStringInteger<TResult>; const aString: string; const aInteger: integer): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aString, aInteger); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TSFuncStringInteger<TResult>; const aString: string; const aInteger: integer): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TSFuncStringInteger<TResult>; const aString: string; const aInteger: integer): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aString, aInteger); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TAFuncStringInteger<TResult>; const aString: string; const aInteger: integer): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TAFuncStringInteger<TResult>; const aString: string; const aInteger: integer): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aString, aInteger); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TOFuncBoolean<TResult>; const aBoolean: boolean): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TOFuncBoolean<TResult>; const aBoolean: boolean): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aBoolean); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TSFuncBoolean<TResult>; const aBoolean: boolean): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TSFuncBoolean<TResult>; const aBoolean: boolean): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aBoolean); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TAFuncBoolean<TResult>; const aBoolean: boolean): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TAFuncBoolean<TResult>; const aBoolean: boolean): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aBoolean); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TOFuncWord<TResult>; const aWORD: WORD): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TOFuncWord<TResult>; const aWORD: WORD): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aWORD); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TSFuncWord<TResult>; const aWORD: WORD): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TSFuncWord<TResult>; const aWORD: WORD): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aWORD); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TAFuncWord<TResult>; const aWORD: WORD): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TAFuncWord<TResult>; const aWORD: WORD): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aWORD); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TOFuncCardinal<TResult>; const aCardinal: cardinal): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TOFuncCardinal<TResult>; const aCardinal: cardinal): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aCardinal); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TSFuncCardinal<TResult>; const aCardinal: cardinal): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TSFuncCardinal<TResult>; const aCardinal: cardinal): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aCardinal); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TAFuncCardinal<TResult>; const aCardinal: cardinal): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TAFuncCardinal<TResult>; const aCardinal: cardinal): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aCardinal); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TOFuncStringString<TResult>; const aString1: string; const aString2: string): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TOFuncStringString<TResult>; const aString1: string; const aString2: string): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aString1, aString2); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TSFuncStringString<TResult>; const aString1: string; const aString2: string): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TSFuncStringString<TResult>; const aString1: string; const aString2: string): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aString1, aString2); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TAFuncStringString<TResult>; const aString1: string; const aString2: string): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TAFuncStringString<TResult>; const aString1: string; const aString2: string): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aString1, aString2); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TOFuncStringBoolean<TResult>; const aString: string; const aBoolean: boolean): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TOFuncStringBoolean<TResult>; const aString: string; const aBoolean: boolean): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aString, aBoolean); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TSFuncStringBoolean<TResult>; const aString: string; const aBoolean: boolean): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TSFuncStringBoolean<TResult>; const aString: string; const aBoolean: boolean): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aString, aBoolean); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TAFuncStringBoolean<TResult>; const aString: string; const aBoolean: boolean): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TAFuncStringBoolean<TResult>; const aString: string; const aBoolean: boolean): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aString, aBoolean); end;
   result := SELF;
@@ -2431,12 +2449,14 @@ procedure TAction.setMethodAssigned(const aValue: boolean);
 begin
   FMethodAssigned := aValue;
 end;
+
 procedure TAction.perform();
 begin
   case assigned(FOProcNoParam) of TRUE: FOProcNoParam(); end;
   case assigned(FSProcNoParam) of TRUE: FSProcNoParam(); end;
   case assigned(FAProcNoParam) of TRUE: FAProcNoParam(); end;
 end;
+
 
 procedure TAction.perform(const aString: string);
 begin
@@ -2445,12 +2465,14 @@ begin
   case assigned(FAProcString) of TRUE: FAProcString(aString); end;
 end;
 
+
 procedure TAction.perform(const aInteger: integer);
 begin
   case assigned(FOProcInteger) of TRUE: FOProcInteger(aInteger); end;
   case assigned(FSProcInteger) of TRUE: FSProcInteger(aInteger); end;
   case assigned(FAProcInteger) of TRUE: FAProcInteger(aInteger); end;
 end;
+
 
 procedure TAction.perform(const aString: string; const aInteger: integer);
 begin
@@ -2459,12 +2481,14 @@ begin
   case assigned(FAProcStringInteger) of TRUE: FAProcStringInteger(aString, aInteger); end;
 end;
 
+
 procedure TAction.perform(const aBoolean: boolean);
 begin
   case assigned(FOProcBoolean) of TRUE: FOProcBoolean(aBoolean); end;
   case assigned(FSProcBoolean) of TRUE: FSProcBoolean(aBoolean); end;
   case assigned(FAProcBoolean) of TRUE: FAProcBoolean(aBoolean); end;
 end;
+
 
 procedure TAction.perform(const aWORD: WORD);
 begin
@@ -2473,6 +2497,7 @@ begin
   case assigned(FAProcWord) of TRUE: FAProcWord(aWORD); end;
 end;
 
+
 procedure TAction.perform(const aCardinal: cardinal);
 begin
   case assigned(FOProcCardinal) of TRUE: FOProcCardinal(aCardinal); end;
@@ -2480,12 +2505,14 @@ begin
   case assigned(FAProcCardinal) of TRUE: FAProcCardinal(aCardinal); end;
 end;
 
+
 procedure TAction.perform(const aString1: string; const aString2: string);
 begin
   case assigned(FOProcStringString) of TRUE: FOProcStringString(aString1, aString2); end;
   case assigned(FSProcStringString) of TRUE: FSProcStringString(aString1, aString2); end;
   case assigned(FAProcStringString) of TRUE: FAProcStringString(aString1, aString2); end;
 end;
+
 
 procedure TAction.perform(const aString: string; const aBoolean: boolean);
 begin

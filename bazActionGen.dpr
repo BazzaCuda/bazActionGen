@@ -147,9 +147,11 @@ begin
 
   case (aFuncProc = fpFunc) and (vUnit = BAZ_ACTION_UNIT) of TRUE:  begin
                               aSL.add(format('    function default(const aValue: %s): IAction%s; // the fallback value', [vResult2, vResult1])); // correct as a function
-                              aSL.add(format('    function getDefault: TResult;', []));
-                              aSL.add(''); end;end;
+                              aSL.add(format('    function getDefault: TResult;', [])); end;end;
 
+  case (aFuncProc = fpFunc) and (vUnit = BAZ_ACTION_UNIT) of TRUE: aSL.add(format('    function ensure(const aBoolean: boolean): IAction%s;', [vResult1])); end;
+
+  aSL.add('');
   for var i := 0 to length(aDefs) - 1 do
     aSL.add(format('    %s perform(%s)%s; overload;', [vFunctionProcedure, aDefs[i].paramDefs, vColon + vResult2]));
 
@@ -177,9 +179,9 @@ begin
   case aFuncProc of fpFunc: begin
     for var i := 0 to length(aDefs) - 1 do begin
        aSL.add('');
-       aSL.add(format('    function plus(const aGuardClause: boolean; const aTrueFunc: TOFunc%s<TResult>; %s): IAction<TResult>; overload;', [aDefs[i].suffix, aDefs[i].paramDefs]));
-       aSL.add(format('    function plus(const aGuardClause: boolean; const aTrueFunc: TSFunc%s<TResult>; %s): IAction<TResult>; overload;', [aDefs[i].suffix, aDefs[i].paramDefs]));
-       aSL.add(format('    function plus(const aGuardClause: boolean; const aTrueFunc: TAFunc%s<TResult>; %s): IAction<TResult>; overload;', [aDefs[i].suffix, aDefs[i].paramDefs]));
+       aSL.add(format('    function aside(const aGuardClause: boolean; const aTrueFunc: TOFunc%s<TResult>; %s): IAction<TResult>; overload;', [aDefs[i].suffix, aDefs[i].paramDefs]));
+       aSL.add(format('    function aside(const aGuardClause: boolean; const aTrueFunc: TSFunc%s<TResult>; %s): IAction<TResult>; overload;', [aDefs[i].suffix, aDefs[i].paramDefs]));
+       aSL.add(format('    function aside(const aGuardClause: boolean; const aTrueFunc: TAFunc%s<TResult>; %s): IAction<TResult>; overload;', [aDefs[i].suffix, aDefs[i].paramDefs]));
     end;end;end;
 
     case (aFuncProc = fpFunc) and (vUnit = BAZ_ACTION_UNIT) of TRUE:  begin
@@ -276,6 +278,9 @@ begin
                                                                           aSL.add('    procedure setSuccess(const aValue: boolean);');
                                                                           aSL.add('    function  default(const aValue: TResult): IAction<TResult>;');
                                                                           aSL.add('    function  getDefault: TResult;'); end;end;end;end;
+
+  case (aFuncProc = fpFunc) and (vUnit = BAZ_ACTION_UNIT) of TRUE: aSL.add(format('    function ensure(const aBoolean: boolean): IAction%s;', [vResult1])); end;
+
   aSL.add('');
 
   case aFuncProc of fpFunc:
@@ -335,9 +340,9 @@ begin
   case aFuncProc of fpFunc:
     for var i := 0 to length(aDefs) - 1 do begin
        aSL.add('');
-       aSL.add(format('    function plus(const aGuardClause: boolean; const aTrueFunc: TOFunc%s<TResult>; %s): IAction<TResult>; overload;', [aDefs[i].suffix, aDefs[i].paramDefs]));
-       aSL.add(format('    function plus(const aGuardClause: boolean; const aTrueFunc: TSFunc%s<TResult>; %s): IAction<TResult>; overload;', [aDefs[i].suffix, aDefs[i].paramDefs]));
-       aSL.add(format('    function plus(const aGuardClause: boolean; const aTrueFunc: TAFunc%s<TResult>; %s): IAction<TResult>; overload;', [aDefs[i].suffix, aDefs[i].paramDefs]));
+       aSL.add(format('    function aside(const aGuardClause: boolean; const aTrueFunc: TOFunc%s<TResult>; %s): IAction<TResult>; overload;', [aDefs[i].suffix, aDefs[i].paramDefs]));
+       aSL.add(format('    function aside(const aGuardClause: boolean; const aTrueFunc: TSFunc%s<TResult>; %s): IAction<TResult>; overload;', [aDefs[i].suffix, aDefs[i].paramDefs]));
+       aSL.add(format('    function aside(const aGuardClause: boolean; const aTrueFunc: TAFunc%s<TResult>; %s): IAction<TResult>; overload;', [aDefs[i].suffix, aDefs[i].paramDefs]));
     end;end;
 
   case (aFuncProc = fpFunc) and (vUnit = BAZ_ACTION_UNIT) of TRUE:  begin
@@ -589,8 +594,18 @@ begin
                                                                       aSL.add('  result := FDefault');
                                                                       aSL.add('end;'); end;end;
 
+  case (aFuncProc = fpFunc) and (vUnit = BAZ_ACTION_UNIT) of TRUE:  begin         // needs to work in non-generic TAction too at some point
+                                                                      aSL.add('');
+                                                                      aSL.add(format('function TAction%s.ensure(const aBoolean: boolean): IAction%s;', [vResult1, vResult1]));
+                                                                      aSL.add('begin');
+                                                                      aSL.add('  success := success and aBoolean;');
+                                                                      aSL.add('  result := SELF;');
+                                                                      aSL.add('end;'); end;end;
+
+
   for var i := 0 to high(aDefs) do
   begin
+    aSL.add('');
     aSL.add(format('%s TAction%s.perform(' + aDefs[i].paramDefs + ')%s%s;', [vFunctionProcedure, vResult1, vColon, vResult2]));
     aSL.add('begin');
     case aFuncProc of fpFunc: begin
@@ -633,7 +648,7 @@ begin
     var vTOTSTA := 'TO';
     for var j := 1 to 3 do begin
       aSL.add('');
-      aSL.add(format('function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: %sFunc%s<TResult>; %s): IAction<TResult>;', [vTOTSTA, aDefs[i].suffix, aDefs[i].paramDefs]));
+      aSL.add(format('function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: %sFunc%s<TResult>; %s): IAction<TResult>;', [vTOTSTA, aDefs[i].suffix, aDefs[i].paramDefs]));
       aSL.add('begin');
       aSL.add(format('  case success and aGuardClause of TRUE: aTrueFunc(%s); end;', [aDefs[i].paramList]));
       aSL.add('  result := SELF;');
@@ -867,18 +882,18 @@ begin
 
     copySection('', FILE_PATH_IN, NIL); // obtain vUnit only
 
-//    readDefs  (vDefs, FILE_PATH_IN);
-//    writeUnit (vDefs, FILE_PATH_IN);
+    readDefs  (vDefs, FILE_PATH_IN);
+    writeUnit (vDefs, FILE_PATH_IN);
 
     //var vResult := TAction<boolean>.pick(TRUE, test).perform('hello', TRUE);
 
-    var result := TAction<boolean>.startWith(TRUE)
-                    .andThen(TRUE, function:boolean begin writeln('first andThen'); result := TRUE; end)
-                    .andThen(TRUE, function:boolean begin writeln('second andThen'); result := TRUE; end)
-                    .thenFinish;
-
-    case result of   TRUE: writeln('TRUE');
-                    FALSE: writeln('FALSE'); end;
+//    var result := TAction<boolean>.startWith(TRUE)
+//                    .andThen(TRUE, function:boolean begin writeln('first andThen'); result := TRUE; end)
+//                    .andThen(TRUE, function:boolean begin writeln('second andThen'); result := TRUE; end)
+//                    .thenFinish;
+//
+//    case result of   TRUE: writeln('TRUE');
+//                    FALSE: writeln('FALSE'); end;
 
 //    var vTestParts := 'LoadsASpaces:  boolean  string           '.split([' ']);
 //    var vTestParts := 'StringInteger: string integer'.split([':']);

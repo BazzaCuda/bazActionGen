@@ -40,15 +40,16 @@ type
   TAProcBooleanString        = reference to procedure(const aBoolean: boolean; const aString: string)          ;           // anonymous method
 
   IAction<TResult> = interface(bazAction.IAction<TResult>)
+
     function perform(const aBoolean: boolean; const aString: string): TResult; overload;
 
     function andThen(const aGuardClause: boolean; const aTrueFunc: TOFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
     function andThen(const aGuardClause: boolean; const aTrueFunc: TSFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
     function andThen(const aGuardClause: boolean; const aTrueFunc: TAFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
 
-    function plus(const aGuardClause: boolean; const aTrueFunc: TOFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TSFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TAFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TOFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TSFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TAFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
   end;
 
   TAction<TResult> = class(bazAction.TAction<TResult>, mmpAction.IAction<TResult>)
@@ -79,12 +80,13 @@ type
     function andThen(const aGuardClause: boolean; const aTrueFunc: TSFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
     function andThen(const aGuardClause: boolean; const aTrueFunc: TAFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
 
-    function plus(const aGuardClause: boolean; const aTrueFunc: TOFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TSFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
-    function plus(const aGuardClause: boolean; const aTrueFunc: TAFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TOFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TSFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
+    function aside(const aGuardClause: boolean; const aTrueFunc: TAFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
   end;
 
   IAction = interface(bazAction.IAction)
+
     procedure perform(const aBoolean: boolean; const aString: string); overload;
   end;
 
@@ -196,6 +198,7 @@ begin
   end;
 end;
 
+
 function TAction<TResult>.perform(const aBoolean: boolean; const aString: string): TResult;
 begin
   result := getDefault;
@@ -238,19 +241,19 @@ begin
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TOFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TOFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aBoolean, aString); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TSFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TSFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aBoolean, aString); end;
   result := SELF;
 end;
 
-function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TAFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>;
+function TAction<TResult>.aside(const aGuardClause: boolean; const aTrueFunc: TAFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>;
 begin
   case success and aGuardClause of TRUE: aTrueFunc(aBoolean, aString); end;
   result := SELF;
@@ -333,6 +336,7 @@ begin
     FALSE:  result := IAction(pointer(TAction.Create(aFalseProc)));
   end;
 end;
+
 
 procedure TAction.perform(const aBoolean: boolean; const aString: string);
 begin
