@@ -1,4 +1,4 @@
-:bazAction
+:mmpAction
 
 #bazAction copyright
 {   bazLib / bazAction

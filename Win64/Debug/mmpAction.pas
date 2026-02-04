@@ -25,7 +25,7 @@ interface
 
 uses
   bazAction;
-  
+
 type
   TVoid = bazAction.TVoid;
 
@@ -33,10 +33,14 @@ type
   TSFuncBooleanString       <TResult> = function(const aBoolean: boolean; const aString: string):                       TResult;           // static method - no class instance
   TAFuncBooleanString       <TResult> = reference to function(const aBoolean: boolean; const aString: string):          TResult;           // anonymous method
 
+  TOProcBooleanString        = procedure(const aBoolean: boolean; const aString: string)                        of object; // method of class instance
+  TSProcBooleanString        = procedure(const aBoolean: boolean; const aString: string)                       ;           // static method - no class instance
+  TAProcBooleanString        = reference to procedure(const aBoolean: boolean; const aString: string)          ;           // anonymous method
+
   IAction<TResult> = interface(bazAction.IAction<TResult>)
     function default(const aValue: TResult): IAction<TResult>; // the fallback value
 
-    function perform(const aBoolean: boolean; const aString: string):                      TResult; overload;
+    function perform(const aBoolean: boolean; const aString: string): TResult; overload;
 
     function getAssigned: boolean;
     property assigned:    boolean read getAssigned;
@@ -44,7 +48,7 @@ type
 
   TAction<TResult> = class(bazAction.TAction<TResult>, bazAction.IAction<TResult>)
   strict private
-    FFuncAssigned: boolean;
+    FCallAssigned: boolean;
     FDefault:      TResult; // initialised by constructor, set by optional .default(), used in .perform()
 
     FOFuncBooleanString:                TOFuncBooleanString                  <TResult>;
@@ -62,15 +66,15 @@ type
     function getAssigned: boolean;
     function default(const aValue: TResult): IAction<TResult>;
 
-    class function pick(const aBoolean: boolean; const aTrueFunc:                   TOFuncBooleanString      <TResult>): IAction<TResult>; overload;
-    class function pick(const aBoolean: boolean; const aTrueFunc:                   TSFuncBooleanString      <TResult>): IAction<TResult>; overload;
-    class function pick(const aBoolean: boolean; const aTrueFunc:                   TAFuncBooleanString      <TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TOFuncBooleanString<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TSFuncBooleanString<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TAFuncBooleanString<TResult>): IAction<TResult>; overload;
 
-    class function pick(const aBoolean: boolean; const aTrueFunc:                   TOFuncBooleanString<TResult>; const aFalseFunc: TOFuncBooleanString<TResult>): IAction<TResult>; overload;
-    class function pick(const aBoolean: boolean; const aTrueFunc:                   TSFuncBooleanString<TResult>; const aFalseFunc: TSFuncBooleanString<TResult>): IAction<TResult>; overload;
-    class function pick(const aBoolean: boolean; const aTrueFunc:                   TAFuncBooleanString<TResult>; const aFalseFunc: TAFuncBooleanString<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TOFuncBooleanString<TResult>; const aFalseFunc: TOFuncBooleanString<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TSFuncBooleanString<TResult>; const aFalseFunc: TSFuncBooleanString<TResult>): IAction<TResult>; overload;
+    class function pick(const aBoolean: boolean; const aTrueFunc: TAFuncBooleanString<TResult>; const aFalseFunc: TAFuncBooleanString<TResult>): IAction<TResult>; overload;
 
-    function perform(const aBoolean: boolean; const aString: string):            TResult; overload;
+    function perform(const aBoolean: boolean; const aString: string):TResult; overload;
   end;
 
 implementation
@@ -94,19 +98,19 @@ end;
 constructor TAction<TResult>.Create(const aFuncBooleanString: TOFuncBooleanString<TResult>);
 begin
   FOFuncBooleanString  := aFuncBooleanString;
-  FFuncAssigned        := assigned(aFuncBooleanString);
+  FCallAssigned        := assigned(aFuncBooleanString);
 end;
 
 constructor TAction<TResult>.Create(const aFuncBooleanString: TSFuncBooleanString<TResult>);
 begin
   FSFuncBooleanString  := aFuncBooleanString;
-  FFuncAssigned        := assigned(aFuncBooleanString);
+  FCallAssigned        := assigned(aFuncBooleanString);
 end;
 
 constructor TAction<TResult>.Create(const aFuncBooleanString: TAFuncBooleanString<TResult>);
 begin
   FAFuncBooleanString  := aFuncBooleanString;
-  FFuncAssigned        := assigned(aFuncBooleanString);
+  FCallAssigned        := assigned(aFuncBooleanString);
 end;
 
 class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TOFuncBooleanString<TResult>): IAction<TResult>;
@@ -159,7 +163,7 @@ end;
 
 function TAction<TResult>.getAssigned: boolean;
 begin
-  result := FFuncAssigned;
+  result := FCallAssigned;
 end;
 
 function TAction<TResult>.default(const aValue: TResult): IAction<TResult>;
