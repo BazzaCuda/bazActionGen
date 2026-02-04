@@ -876,24 +876,45 @@ begin
   end;
 end;
 
+function soTrue: boolean;
+begin
+  result := TRUE;
+end;
+
+function sayItsTrue: boolean;
+begin
+  writeLn('It''s twoo! It''s twoo!');
+  result := TRUE;
+end;
+
+function whisperSweetNothings: boolean;
+begin
+  writeLn('Wut?');
+  result := FALSE;
+end;
+
 begin
   try
     // testReadDefs('bazActionDefs.txt');
 
     copySection('', FILE_PATH_IN, NIL); // obtain vUnit only
 
-    readDefs  (vDefs, FILE_PATH_IN);
-    writeUnit (vDefs, FILE_PATH_IN);
+//    readDefs  (vDefs, FILE_PATH_IN);
+//    writeUnit (vDefs, FILE_PATH_IN);
 
     //var vResult := TAction<boolean>.pick(TRUE, test).perform('hello', TRUE);
 
-//    var result := TAction<boolean>.startWith(TRUE)
-//                    .andThen(TRUE, function:boolean begin writeln('first andThen'); result := TRUE; end)
-//                    .andThen(TRUE, function:boolean begin writeln('second andThen'); result := TRUE; end)
-//                    .thenFinish;
-//
-//    case result of   TRUE: writeln('TRUE');
-//                    FALSE: writeln('FALSE'); end;
+    var result := TAction<boolean>.startWith(TRUE)
+                    .ensure(TRUE)
+                    .andThen(TRUE, function:boolean begin writeln('first andThen'); result := TRUE; end)
+                    .andThen(TRUE, function:boolean begin writeln('second andThen'); result := TRUE; end)
+                    .aside(TRUE, whisperSweetNothings)
+                    .andthen(TRUE, sayItsTrue)
+                    .andThen(TRUE, soTrue)
+                    .thenFinish;
+
+    case result of   TRUE: writeln('TWOO...I mean, TRUE');
+                    FALSE: writeln('FALSE'); end;
 
 //    var vTestParts := 'LoadsASpaces:  boolean  string           '.split([' ']);
 //    var vTestParts := 'StringInteger: string integer'.split([':']);
