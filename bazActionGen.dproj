@@ -176,6 +176,7 @@
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
         <DCCReference Include="Win64\Debug\bazAction.pas"/>
+        <DCCReference Include="Win64\Debug\mmpAction.pas"/>
         <DCCReference Include="..\_MVVM\_bazLib\bazRTL.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>

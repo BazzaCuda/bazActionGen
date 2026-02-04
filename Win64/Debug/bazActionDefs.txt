@@ -1,9 +1,9 @@
-:mmpAction
+:bazAction
 
 #bazAction copyright
 {   bazLib / bazAction
     Copyright (C) 2021-2099 Baz Cuda
-    https://github.com/BazzaCuda/
+    https://github.com/BazzaCuda/bazLib
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,9 +20,9 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307, USA
 }
 #mmpAction copyright
-{   MMP: Minimalist Media Player
+{   bazLib / bazAction
     Copyright (C) 2021-2099 Baz Cuda
-    https://github.com/BazzaCuda/MinimalistMediaPlayerX
+    https://github.com/BazzaCuda/bazLib
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

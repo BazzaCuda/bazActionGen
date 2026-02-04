@@ -1,6 +1,6 @@
-{   MMP: Minimalist Media Player
+{   bazLib / bazAction
     Copyright (C) 2021-2099 Baz Cuda
-    https://github.com/BazzaCuda/MinimalistMediaPlayerX
+    https://github.com/BazzaCuda/bazLib
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,9 +33,11 @@ type
   TSFuncBooleanString       <TResult> = function(const aBoolean: boolean; const aString: string):                       TResult;           // static method - no class instance
   TAFuncBooleanString       <TResult> = reference to function(const aBoolean: boolean; const aString: string):          TResult;           // anonymous method
 
+
   TOProcBooleanString        = procedure(const aBoolean: boolean; const aString: string)                        of object; // method of class instance
   TSProcBooleanString        = procedure(const aBoolean: boolean; const aString: string)                       ;           // static method - no class instance
   TAProcBooleanString        = reference to procedure(const aBoolean: boolean; const aString: string)          ;           // anonymous method
+
 
   IAction<TResult> = interface(bazAction.IAction<TResult>)
     function default(const aValue: TResult): IAction<TResult>; // the fallback value
@@ -74,7 +76,43 @@ type
     class function pick(const aBoolean: boolean; const aTrueFunc: TSFuncBooleanString<TResult>; const aFalseFunc: TSFuncBooleanString<TResult>): IAction<TResult>; overload;
     class function pick(const aBoolean: boolean; const aTrueFunc: TAFuncBooleanString<TResult>; const aFalseFunc: TAFuncBooleanString<TResult>): IAction<TResult>; overload;
 
-    function perform(const aBoolean: boolean; const aString: string):TResult; overload;
+    function perform(const aBoolean: boolean; const aString: string): TResult; overload;
+  end;
+
+  IAction = interface(bazAction.IAction)
+    procedure perform(const aBoolean: boolean; const aString: string); overload;
+
+    function getAssigned: boolean;
+    property assigned:    boolean read getAssigned;
+  end;
+
+  TAction = class(bazAction.TAction, bazAction.IAction)
+  strict private
+    FCallAssigned: boolean;
+
+    FOProcBooleanString:                TOProcBooleanString                  ;
+    FSProcBooleanString:                TAProcBooleanString                  ;
+    FAProcBooleanString:                TAProcBooleanString                  ;
+
+    constructor Create;                           overload;
+    constructor Create(const aProcNIL: pointer);  overload;
+
+    constructor Create(const aProcBooleanString:     TOProcBooleanString       );     overload;
+    constructor Create(const aProcBooleanString:     TSProcBooleanString       );     overload;
+    constructor Create(const aProcBooleanString:     TAProcBooleanString       );     overload;
+
+  public
+    function getAssigned: boolean;
+
+    class function pick(const aBoolean: boolean; const aTrueProc: TOProcBooleanString): IAction; overload;
+    class function pick(const aBoolean: boolean; const aTrueProc: TSProcBooleanString): IAction; overload;
+    class function pick(const aBoolean: boolean; const aTrueProc: TAProcBooleanString): IAction; overload;
+
+    class function pick(const aBoolean: boolean; const aTrueProc: TOProcBooleanString; const aFalseProc: TOProcBooleanString): IAction; overload;
+    class function pick(const aBoolean: boolean; const aTrueProc: TSProcBooleanString; const aFalseProc: TSProcBooleanString): IAction; overload;
+    class function pick(const aBoolean: boolean; const aTrueProc: TAProcBooleanString; const aFalseProc: TAProcBooleanString): IAction; overload;
+
+    procedure perform(const aBoolean: boolean; const aString: string); overload;
   end;
 
 implementation
@@ -92,9 +130,8 @@ end;
 constructor TAction<TResult>.Create(const aFuncNIL: pointer);
 begin
   case aFuncNIL = NIL of   TRUE: EXIT;
-                          FALSE: raise exception.Create('Functionless constructor must be called with NIL'); end;
+                          FALSE: raise exception.Create('Methodless constructor must be called with NIL'); end;
 end;
-
 constructor TAction<TResult>.Create(const aFuncBooleanString: TOFuncBooleanString<TResult>);
 begin
   FOFuncBooleanString  := aFuncBooleanString;
@@ -178,6 +215,97 @@ begin
   case assigned(FOFuncBooleanString) of TRUE: EXIT(FOFuncBooleanString(aBoolean, aString)); end;
   case assigned(FSFuncBooleanString) of TRUE: EXIT(FSFuncBooleanString(aBoolean, aString)); end;
   case assigned(FAFuncBooleanString) of TRUE: EXIT(FAFuncBooleanString(aBoolean, aString)); end;
+end;
+
+
+{ TAction }
+
+constructor TAction.Create;
+begin
+  raise exception.create('Don''t call TAction.create');
+end;
+
+constructor TAction.Create(const aProcNIL: pointer);
+begin
+  case aProcNIL = NIL of   TRUE: EXIT;
+                          FALSE: raise exception.Create('Methodless constructor must be called with NIL'); end;
+end;
+constructor TAction.Create(const aProcBooleanString: TOProcBooleanString);
+begin
+  FOProcBooleanString  := aProcBooleanString;
+  FCallAssigned        := assigned(aProcBooleanString);
+end;
+
+constructor TAction.Create(const aProcBooleanString: TSProcBooleanString);
+begin
+  FSProcBooleanString  := aProcBooleanString;
+  FCallAssigned        := assigned(aProcBooleanString);
+end;
+
+constructor TAction.Create(const aProcBooleanString: TAProcBooleanString);
+begin
+  FAProcBooleanString  := aProcBooleanString;
+  FCallAssigned        := assigned(aProcBooleanString);
+end;
+
+class function TAction.pick(const aBoolean: boolean; const aTrueProc: TOProcBooleanString): IAction;
+begin
+  case aBoolean of
+     TRUE:  result := IAction(pointer(TAction.Create(aTrueProc)));
+    FALSE:  result := IAction(pointer(TAction.Create(NIL)));
+  end;
+end;
+
+class function TAction.pick(const aBoolean: boolean; const aTrueProc: TSProcBooleanString): IAction;
+begin
+  case aBoolean of
+     TRUE:  result := IAction(pointer(TAction.Create(aTrueProc)));
+    FALSE:  result := IAction(pointer(TAction.Create(NIL)));
+  end;
+end;
+
+class function TAction.pick(const aBoolean: boolean; const aTrueProc: TAProcBooleanString): IAction;
+begin
+  case aBoolean of
+     TRUE:  result := IAction(pointer(TAction.Create(aTrueProc)));
+    FALSE:  result := IAction(pointer(TAction.Create(NIL)));
+  end;
+end;
+
+class function TAction.pick(const aBoolean: boolean; const aTrueProc: TOProcBooleanString; const aFalseProc: TOProcBooleanString): IAction;
+begin
+  case aBoolean of
+     TRUE:  result := IAction(pointer(TAction.Create(aTrueProc)));
+    FALSE:  result := IAction(pointer(TAction.Create(aFalseProc)));
+  end;
+end;
+
+class function TAction.pick(const aBoolean: boolean; const aTrueProc: TSProcBooleanString; const aFalseProc: TSProcBooleanString): IAction;
+begin
+  case aBoolean of
+     TRUE:  result := IAction(pointer(TAction.Create(aTrueProc)));
+    FALSE:  result := IAction(pointer(TAction.Create(aFalseProc)));
+  end;
+end;
+
+class function TAction.pick(const aBoolean: boolean; const aTrueProc: TAProcBooleanString; const aFalseProc: TAProcBooleanString): IAction;
+begin
+  case aBoolean of
+     TRUE:  result := IAction(pointer(TAction.Create(aTrueProc)));
+    FALSE:  result := IAction(pointer(TAction.Create(aFalseProc)));
+  end;
+end;
+
+function TAction.getAssigned: boolean;
+begin
+  result := FCallAssigned;
+end;
+
+procedure TAction.perform(const aBoolean: boolean; const aString: string);
+begin
+  case assigned(FOProcBooleanString) of TRUE: FOProcBooleanString(aBoolean, aString); end;
+  case assigned(FSProcBooleanString) of TRUE: FSProcBooleanString(aBoolean, aString); end;
+  case assigned(FAProcBooleanString) of TRUE: FAProcBooleanString(aBoolean, aString); end;
 end;
 
 end.

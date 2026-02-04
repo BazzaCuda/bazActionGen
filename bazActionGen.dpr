@@ -29,7 +29,7 @@ uses
   system.sysUtils,
   vcl.dialogs,
   bazAction in 'Win64\Debug\bazAction.pas',
-//  mmpAction in 'Win64\Debug\mmpAction.pas',
+  mmpAction in 'Win64\Debug\mmpAction.pas',
   bazRTL in '..\_MVVM\_bazLib\bazRTL.pas';
 
 type
@@ -122,6 +122,8 @@ begin
 
     vFuncPrefix := format('reference to %s(' + aDefs[i].paramDefs + ')%s', [vFunctionProcedure, vColon]);
     aSL.add(format('  TA%s%-*s%s = %-*s%s;           // anonymous method', [vFuncProc, WIDTH_SUFFIX, aDefs[i].suffix, vResult1, WIDTH_PARAMS, vFuncPrefix, vResult2]));
+
+    aSL.add('');
   end;
 end;
 
@@ -143,8 +145,9 @@ begin
   case vUnit = BAZ_ACTION_UNIT of  TRUE: aSL.add(format('  IAction%s = interface', [vResult1]));
                                   FALSE: aSL.add(format('  IAction%s = interface(bazAction.IAction%s)', [vResult1, vResult1])); end;
 
+  case aFuncProc of fpFunc: begin
   aSL.add(format('    function default(const aValue: %s): IAction%s; // the fallback value', [vResult2, vResult1])); // correct as a function
-  aSL.add('');
+  aSL.add(''); end;end;
 
   for var i := 0 to length(aDefs) - 1 do
     aSL.add(format('    %s perform(%s)%s; overload;', [vFunctionProcedure, aDefs[i].paramDefs, vColon + vResult2]));
@@ -280,37 +283,44 @@ begin
     aSL.add(format('    %s perform(%s)%s; overload;', [vFunctionProcedure, aDefs[i].paramDefs, vColon + vResult2]));
 
   aSL.add('  end;');
-  aSL.add('');
 end;
 
 procedure writeImplementationHeader(const aSL: TStringList; const aFuncProc: TFuncProc);
 begin
   var vResult1 := '';
   case aFuncProc of fpFunc: vResult1 := '<TResult>'; end;
+  aSL.add('');
   aSL.add('implementation');
   aSL.add('');
 
   case aFuncProc of fpFunc: begin
                               aSL.add('uses');
-                              aSL.add('  bazRTL;');
-                              aSL.add('');end;end;
-
-  aSL.add(format('{ TAction%s }', [vResult1]));
+                              aSL.add('  bazRTL;'); end;end;
 end;
 
-procedure writeConstructorsFixed(aDefs: TDefs; const aSL: TStringList);
+procedure writeConstructorsFixed(aDefs: TDefs; const aSL: TStringList; const aFuncProc: TFuncProc);
 begin
+  var vResult1  := '';
+  var vFuncProc := 'Proc';
+  case aFuncProc of fpFunc: begin
+                              vResult1 := '<TResult>';
+                              vFuncProc := 'Func'; end;end;
+
+
   aSL.add('');
-  aSL.add('constructor TAction<TResult>.Create;');
+  aSL.add(format('{ TAction%s }', [vResult1]));
+
+  aSL.add('');
+  aSL.add(format('constructor TAction%s.Create;', [vResult1]));
   aSL.add('begin');
   aSL.add('  raise exception.create(''Don''''t call TAction.create'');');
   aSL.add('end;');
   aSL.add('');
 
-  aSL.add('constructor TAction<TResult>.Create(const aFuncNIL: pointer);');
+  aSL.add(format('constructor TAction%s.Create(const a%sNIL: pointer);', [vResult1, vFuncProc]));
   aSL.add('begin');
-  aSL.add('  case aFuncNIL = NIL of   TRUE: EXIT;');
-  aSL.add('                          FALSE: raise exception.Create(''Functionless constructor must be called with NIL''); end;');
+  aSL.add(format('  case a%sNIL = NIL of   TRUE: EXIT;', [vFuncProc]));
+  aSL.add('                          FALSE: raise exception.Create(''Methodless constructor must be called with NIL''); end;');
   aSL.add('end;');
 end;
 
@@ -373,76 +383,96 @@ end;
 
 procedure writePicksTrueFunc(const aDefs: TDefs; const aSL: TStringList; const aFuncProc: TFuncProc);
 begin
+  var vResult1            := '';
+  var vFuncProc           := 'Proc';
+  var vFunctionProcedure  := 'procedure';
+  case aFuncProc of fpFunc: begin
+                              vResult1 := '<TResult>';
+                              vFuncProc := 'Func';
+                              vFunctionProcedure := 'function'; end;end;
+
+  // picks are always functions
   for var i := 0 to high(aDefs) do
   begin
-    aSL.add(format('class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TOFunc%s<TResult>): IAction<TResult>;', [aDefs[i].suffix]));
+    aSL.add(format('class function TAction%s.pick(const aBoolean: boolean; const aTrue%s: TO%s%s%s): IAction%s;', [vResult1, vFuncProc, vFuncProc, aDefs[i].suffix, vResult1, vResult1]));
     aSL.add('begin');
     aSL.add('  case aBoolean of');
 
     var vPointerPrefix: string := '';
     var vPointerSuffix: string := '';
-    case vUnit = BAZ_ACTION_UNIT of FALSE: vPointerPrefix := 'IAction<TResult>(pointer('; end;
+    case vUnit = BAZ_ACTION_UNIT of FALSE: vPointerPrefix := format('IAction%s(pointer(', [vResult1]); end;
     case vUnit = BAZ_ACTION_UNIT of FALSE: vPointerSuffix := '))'; end;
 
-    aSL.add(format('     TRUE:  result := %sTAction<TResult>.Create(aTrueFunc)%s;', [vPointerPrefix, vPointerSuffix]));
-    aSL.add(format('    FALSE:  result := %sTAction<TResult>.Create(NIL)%s;', [vPointerPrefix, vPointerSuffix]));
+    aSL.add(format('     TRUE:  result := %sTAction%s.Create(aTrue%s)%s;', [vPointerPrefix, vResult1, vFuncProc, vPointerSuffix]));
+    aSL.add(format('    FALSE:  result := %sTAction%s.Create(NIL)%s;',     [vPointerPrefix, vResult1, vPointerSuffix]));
     aSL.add('  end;');
     aSL.add('end;');
     aSL.add('');
 
-    aSL.add(format('class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TSFunc%s<TResult>): IAction<TResult>;', [aDefs[i].suffix]));
+    aSL.add(format('class function TAction%s.pick(const aBoolean: boolean; const aTrue%s: TS%s%s%s): IAction%s;', [vResult1, vFuncProc, vFuncProc, aDefs[i].suffix, vResult1, vResult1]));
     aSL.add('begin');
     aSL.add('  case aBoolean of');
-    aSL.add(format('     TRUE:  result := %sTAction<TResult>.Create(aTrueFunc)%s;', [vPointerPrefix, vPointerSuffix]));
-    aSL.add(format('    FALSE:  result := %sTAction<TResult>.Create(NIL)%s;', [vPointerPrefix, vPointerSuffix]));
+    aSL.add(format('     TRUE:  result := %sTAction%s.Create(aTrue%s)%s;', [vPointerPrefix, vResult1, vFuncProc, vPointerSuffix]));
+    aSL.add(format('    FALSE:  result := %sTAction%s.Create(NIL)%s;',     [vPointerPrefix, vResult1, vPointerSuffix]));
     aSL.add('  end;');
     aSL.add('end;');
     aSL.add('');
 
-    aSL.add(format('class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TAFunc%s<TResult>): IAction<TResult>;', [aDefs[i].suffix]));
+    aSL.add(format('class function TAction%s.pick(const aBoolean: boolean; const aTrue%s: TA%s%s%s): IAction%s;', [vResult1, vFuncProc, vFuncProc, aDefs[i].suffix, vResult1, vResult1]));
     aSL.add('begin');
     aSL.add('  case aBoolean of');
-    aSL.add(format('     TRUE:  result := %sTAction<TResult>.Create(aTrueFunc)%s;', [vPointerPrefix, vPointerSuffix]));
-    aSL.add(format('    FALSE:  result := %sTAction<TResult>.Create(NIL)%s;', [vPointerPrefix, vPointerSuffix]));
+    aSL.add(format('     TRUE:  result := %sTAction%s.Create(aTrue%s)%s;', [vPointerPrefix, vResult1, vFuncProc, vPointerSuffix]));
+    aSL.add(format('    FALSE:  result := %sTAction%s.Create(NIL)%s;',     [vPointerPrefix, vResult1, vPointerSuffix]));
     aSL.add('  end;');
     aSL.add('end;');
     aSL.add('');
   end;
 end;
 
-procedure writePicksTrueFalseFunc(const aDefs: TDefs; const aSL: TStringList);
+procedure writePicksTrueFalseFunc(const aDefs: TDefs; const aSL: TStringList; const aFuncProc: TFuncProc);
 begin
+  var vResult1            := '';
+  var vFuncProc           := 'Proc';
+  var vFunctionProcedure  := 'procedure';
+  case aFuncProc of fpFunc: begin
+                              vResult1            := '<TResult>';
+                              vFuncProc           := 'Func';
+                              vFunctionProcedure  := 'function'; end;end;
+
+  var vPointerPrefix: string := '';
+  var vPointerSuffix: string := '';
+  case vUnit = BAZ_ACTION_UNIT of FALSE: vPointerPrefix := format('IAction%s(pointer(', [vResult1]); end;
+  case vUnit = BAZ_ACTION_UNIT of FALSE: vPointerSuffix := '))'; end;
+
+  // picks are always functions
   for var i := 0 to high(aDefs) do
   begin
-    aSL.add(format('class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TOFunc%s<TResult>; const aFalseFunc: TOFunc%s<TResult>): IAction<TResult>;', [aDefs[i].suffix, aDefs[i].suffix]));
+    aSL.add(format('class function TAction%s.pick(const aBoolean: boolean; const aTrue%s: TO%s%s%s; const aFalse%s: TO%s%s%s): IAction%s;', [vResult1, vFuncProc, vFuncProc, aDefs[i].suffix, vResult1, vFuncProc, vFuncProc, aDefs[i].suffix, vResult1, vResult1]));
     aSL.add('begin');
     aSL.add('  case aBoolean of');
 
-    var vPointerPrefix: string := '';
-    var vPointerSuffix: string := '';
-    case vUnit = BAZ_ACTION_UNIT of FALSE: vPointerPrefix := 'IAction<TResult>(pointer('; end;
-    case vUnit = BAZ_ACTION_UNIT of FALSE: vPointerSuffix := '))'; end;
-
-    aSL.add(format('     TRUE:  result := %sTAction<TResult>.Create(aTrueFunc)%s;', [vPointerPrefix, vPointerSuffix]));
-    aSL.add(format('    FALSE:  result := %sTAction<TResult>.Create(aFalseFunc)%s;', [vPointerPrefix, vPointerSuffix]));
+    aSL.add(format('     TRUE:  result := %sTAction%s.Create(aTrue%s)%s;',  [vPointerPrefix, vResult1, vFuncProc, vPointerSuffix]));
+    aSL.add(format('    FALSE:  result := %sTAction%s.Create(aFalse%s)%s;', [vPointerPrefix, vResult1, vFuncProc, vPointerSuffix]));
     aSL.add('  end;');
     aSL.add('end;');
     aSL.add('');
 
-    aSL.add(format('class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TSFunc%s<TResult>; const aFalseFunc: TSFunc%s<TResult>): IAction<TResult>;', [aDefs[i].suffix, aDefs[i].suffix]));
+    aSL.add(format('class function TAction%s.pick(const aBoolean: boolean; const aTrue%s: TS%s%s%s; const aFalse%s: TS%s%s%s): IAction%s;', [vResult1, vFuncProc, vFuncProc, aDefs[i].suffix, vResult1, vFuncProc, vFuncProc, aDefs[i].suffix, vResult1, vResult1]));
     aSL.add('begin');
     aSL.add('  case aBoolean of');
-    aSL.add(format('     TRUE:  result := %sTAction<TResult>.Create(aTrueFunc)%s;', [vPointerPrefix, vPointerSuffix]));
-    aSL.add(format('    FALSE:  result := %sTAction<TResult>.Create(aFalseFunc)%s;', [vPointerPrefix, vPointerSuffix]));
+
+    aSL.add(format('     TRUE:  result := %sTAction%s.Create(aTrue%s)%s;',  [vPointerPrefix, vResult1, vFuncProc, vPointerSuffix]));
+    aSL.add(format('    FALSE:  result := %sTAction%s.Create(aFalse%s)%s;', [vPointerPrefix, vResult1, vFuncProc, vPointerSuffix]));
     aSL.add('  end;');
     aSL.add('end;');
     aSL.add('');
 
-    aSL.add(format('class function TAction<TResult>.pick(const aBoolean: boolean; const aTrueFunc: TAFunc%s<TResult>; const aFalseFunc: TAFunc%s<TResult>): IAction<TResult>;', [aDefs[i].suffix, aDefs[i].suffix]));
+    aSL.add(format('class function TAction%s.pick(const aBoolean: boolean; const aTrue%s: TA%s%s%s; const aFalse%s: TA%s%s%s): IAction%s;', [vResult1, vFuncProc, vFuncProc, aDefs[i].suffix, vResult1, vFuncProc, vFuncProc, aDefs[i].suffix, vResult1, vResult1]));
     aSL.add('begin');
     aSL.add('  case aBoolean of');
-    aSL.add(format('     TRUE:  result := %sTAction<TResult>.Create(aTrueFunc)%s;', [vPointerPrefix, vPointerSuffix]));
-    aSL.add(format('    FALSE:  result := %sTAction<TResult>.Create(aFalseFunc)%s;', [vPointerPrefix, vPointerSuffix]));
+
+    aSL.add(format('     TRUE:  result := %sTAction%s.Create(aTrue%s)%s;',  [vPointerPrefix, vResult1, vFuncProc, vPointerSuffix]));
+    aSL.add(format('    FALSE:  result := %sTAction%s.Create(aFalse%s)%s;', [vPointerPrefix, vResult1, vFuncProc, vPointerSuffix]));
     aSL.add('  end;');
     aSL.add('end;');
     aSL.add('');
@@ -451,8 +481,17 @@ end;
 
 procedure writePerforms(const aDefs: TDefs; const aSL: TStringList; const aFuncProc: TFuncProc);
 begin
-  var vResult1 := '';
-  case aFuncProc of fpFunc: vResult1 := '<TResult>'; end;
+  var vResult1            := '';
+  var vResult2            := '';
+  var vColon              := '';
+  var vFuncProc           := 'Proc';
+  var vFunctionProcedure  := 'procedure';
+
+  case aFuncProc of fpFunc: begin
+                              vFunctionProcedure  := 'function';
+                              vColon              := ': ';
+                              vResult1            := '<TResult>';
+                              vResult2            := 'TResult'; end;end;
 
   aSL.add(format('function TAction%s.getAssigned: boolean;', [vResult1]));
   aSL.add('begin');
@@ -465,26 +504,30 @@ begin
   case vUnit = BAZ_ACTION_UNIT of FALSE: vPointerPrefix := format('IAction%s(pointer(', [vResult1]); end;
   case vUnit = BAZ_ACTION_UNIT of FALSE: vPointerSuffix := '))'; end;
 
-  aSL.add(format('function TAction%s.default(const aValue: TResult): IAction%s;', [vResult1, vResult1]));
+  case aFuncProc of fpFunc: begin
+  aSL.add(format('function TAction%s.default(const aValue: TResult): IAction%s;', [vResult1, vResult1]));     // procedures don't have a default result
   aSL.add('begin');
   aSL.add('  FDefault := aValue;');
   aSL.add(format('  result   := %sSELF%s;', [vPointerPrefix, vPointerSuffix]));
   aSL.add('end;');
-  aSL.add('');
+  aSL.add(''); end;end;
 
   for var i := 0 to high(aDefs) do
   begin
-    aSL.add('function TAction<TResult>.perform(' + aDefs[i].paramDefs + '): TResult;');
+    aSL.add(format('%s TAction%s.perform(' + aDefs[i].paramDefs + ')%s%s;', [vFunctionProcedure, vResult1, vColon, vResult2]));
     aSL.add('begin');
+    case aFuncProc of fpFunc: begin
     aSL.add('  result := FDefault;');
     aSL.add('  case assigned(FOFunc' + aDefs[i].suffix + ') of TRUE: EXIT(FOFunc' + aDefs[i].suffix + '(' + aDefs[i].paramList+ ')); end;');
     aSL.add('  case assigned(FSFunc' + aDefs[i].suffix + ') of TRUE: EXIT(FSFunc' + aDefs[i].suffix + '(' + aDefs[i].paramList + ')); end;');
-    aSL.add('  case assigned(FAFunc' + aDefs[i].suffix + ') of TRUE: EXIT(FAFunc' + aDefs[i].suffix + '(' + aDefs[i].paramList + ')); end;');
+    aSL.add('  case assigned(FAFunc' + aDefs[i].suffix + ') of TRUE: EXIT(FAFunc' + aDefs[i].suffix + '(' + aDefs[i].paramList + ')); end;'); end;end;
+    case aFuncProc of fpProc: begin
+    aSL.add('  case assigned(FOProc' + aDefs[i].suffix + ') of TRUE: FOProc' + aDefs[i].suffix + '(' + aDefs[i].paramList+ '); end;');
+    aSL.add('  case assigned(FSProc' + aDefs[i].suffix + ') of TRUE: FSProc' + aDefs[i].suffix + '(' + aDefs[i].paramList + '); end;');
+    aSL.add('  case assigned(FAProc' + aDefs[i].suffix + ') of TRUE: FAProc' + aDefs[i].suffix + '(' + aDefs[i].paramList + '); end;'); end;end;
     aSL.add('end;');
     aSL.add('');
   end;
-
-  aSL.add('end.');
 end;
 
 function copySection(const aHeader: string; const aFilePath: string; const aSL: TStringList): TVoid;
@@ -528,7 +571,7 @@ begin
     writeTypes(aDefs, vSL, fpFunc);
     writeTypes(aDefs, vSL, fpProc);
 
-// interface and class definitions
+// interface and class definitions functions
     writeInterface            (aDefs, vSL, fpFunc); // interface definition, not the interface section header
     writeClassHeader          (aDefs, vSL, fpFunc);
     writeClassMembers         (aDefs, vSL, fpFunc);
@@ -536,13 +579,31 @@ begin
     writeClassPicks           (aDefs, vSL, fpFunc);
     writeClassPerforms        (aDefs, vSL, fpFunc);
 
-// implementation section
+// interface and class definitions procedures
+    writeInterface            (aDefs, vSL, fpProc); // interface definition, not the interface section header
+    writeClassHeader          (aDefs, vSL, fpProc);
+    writeClassMembers         (aDefs, vSL, fpProc);
+    writeClassConstructors    (aDefs, vSL, fpProc);
+    writeClassPicks           (aDefs, vSL, fpProc);
+    writeClassPerforms        (aDefs, vSL, fpProc);
+
+// implementation section functions
     writeImplementationHeader (       vSL, fpFunc);
-    writeConstructorsFixed    (aDefs, vSL);
+    writeConstructorsFixed    (aDefs, vSL, fpFunc);
     writeConstructors         (aDefs, vSL, fpFunc);
-    writePicksTrueFunc        (aDefs, vSL);
-    writePicksTrueFalseFunc   (aDefs, vSL);
+    writePicksTrueFunc        (aDefs, vSL, fpFunc);
+    writePicksTrueFalseFunc   (aDefs, vSL, fpFunc);
     writePerforms             (aDefs, vSL, fpFunc);
+
+// implementation section procedures
+//    writeImplementationHeader (       vSL, fpProc);
+    writeConstructorsFixed    (aDefs, vSL, fpProc);
+    writeConstructors         (aDefs, vSL, fpProc);
+    writePicksTrueFunc        (aDefs, vSL, fpProc);
+    writePicksTrueFalseFunc   (aDefs, vSL, fpProc);
+    writePerforms             (aDefs, vSL, fpProc);
+
+    vSL.add('end.');
 
     vSL.saveToFile(vUnit + '.pas');
   finally
