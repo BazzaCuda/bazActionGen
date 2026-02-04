@@ -186,7 +186,7 @@ begin
 
     case (aFuncProc = fpFunc) and (vUnit = BAZ_ACTION_UNIT) of TRUE:  begin
                                                                         aSL.add('');
-                                                                        aSL.add('    function thenFinish: boolean;'); end;end;
+                                                                        aSL.add('    function thenStop: boolean;'); end;end;
   aSL.add('  end;');
 end;
 
@@ -347,7 +347,7 @@ begin
 
   case (aFuncProc = fpFunc) and (vUnit = BAZ_ACTION_UNIT) of TRUE:  begin
                                                                       aSL.add('');
-                                                                      aSL.add('    function thenFinish: boolean;');
+                                                                      aSL.add('    function thenStop: boolean;');
                                                                       aSL.add('');
                                                                       aSL.add('    property success:        boolean read getSuccess         write setSuccess;'); end;end;
 
@@ -678,7 +678,7 @@ begin
     aSL.add('end;');
 
     aSL.add('');
-    aSL.add('function TAction<TResult>.thenFinish: boolean;');
+    aSL.add('function TAction<TResult>.thenStop: boolean;');
     aSL.add('begin');
     aSL.add('  result := FSuccess;');
     aSL.add('end;');
@@ -899,8 +899,8 @@ begin
 
     copySection('', FILE_PATH_IN, NIL); // obtain vUnit only
 
-//    readDefs  (vDefs, FILE_PATH_IN);
-//    writeUnit (vDefs, FILE_PATH_IN);
+    readDefs  (vDefs, FILE_PATH_IN);
+    writeUnit (vDefs, FILE_PATH_IN);
 
     //var vResult := TAction<boolean>.pick(TRUE, test).perform('hello', TRUE);
 
@@ -911,7 +911,7 @@ begin
                     .aside(TRUE, whisperSweetNothings)
                     .andthen(TRUE, sayItsTrue)
                     .andThen(TRUE, soTrue)
-                    .thenFinish;
+                    .thenStop;
 
     case result of   TRUE: writeln('TWOO...I mean, TRUE');
                     FALSE: writeln('FALSE'); end;
