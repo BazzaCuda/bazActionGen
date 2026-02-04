@@ -29,6 +29,7 @@ uses
 type
   TVoid = bazAction.TVoid;
 
+
   TOFuncBooleanString       <TResult> = function(const aBoolean: boolean; const aString: string):                       TResult of object; // method of class instance
   TSFuncBooleanString       <TResult> = function(const aBoolean: boolean; const aString: string):                       TResult;           // static method - no class instance
   TAFuncBooleanString       <TResult> = reference to function(const aBoolean: boolean; const aString: string):          TResult;           // anonymous method
@@ -38,7 +39,6 @@ type
   TSProcBooleanString        = procedure(const aBoolean: boolean; const aString: string)                       ;           // static method - no class instance
   TAProcBooleanString        = reference to procedure(const aBoolean: boolean; const aString: string)          ;           // anonymous method
 
-
   IAction<TResult> = interface(bazAction.IAction<TResult>)
     function default(const aValue: TResult): IAction<TResult>; // the fallback value
 
@@ -46,9 +46,23 @@ type
 
     function getAssigned: boolean;
     property assigned:    boolean read getAssigned;
+
+    function  getSuccess:  boolean;
+    procedure setSuccess(const aValue: boolean);
+    property  success:     boolean read getSuccess write setSuccess;
+
+    function andThen(const aGuardClause: boolean; const aTrueFunc: TOFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
+    function andThen(const aGuardClause: boolean; const aTrueFunc: TSFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
+    function andThen(const aGuardClause: boolean; const aTrueFunc: TAFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
+
+    function plus(const aGuardClause: boolean; const aTrueFunc: TOFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
+    function plus(const aGuardClause: boolean; const aTrueFunc: TSFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
+    function plus(const aGuardClause: boolean; const aTrueFunc: TAFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
+
+    function thenFinish: boolean;
   end;
 
-  TAction<TResult> = class(bazAction.TAction<TResult>, bazAction.IAction<TResult>)
+  TAction<TResult> = class(bazAction.TAction<TResult>, mmpAction.IAction<TResult>)
   strict private
     FCallAssigned: boolean;
     FDefault:      TResult; // initialised by constructor, set by optional .default(), used in .perform()
@@ -65,8 +79,10 @@ type
     constructor Create(const aFuncBooleanString:     TAFuncBooleanString      <TResult>);     overload;
 
   public
-    function getAssigned: boolean;
-    function default(const aValue: TResult): IAction<TResult>;
+    function  getAssigned: boolean;
+    function  getSuccess:  boolean;
+    procedure setSuccess(const aValue: boolean);
+    function  default(const aValue: TResult): IAction<TResult>;
 
     class function pick(const aBoolean: boolean; const aTrueFunc: TOFuncBooleanString<TResult>): IAction<TResult>; overload;
     class function pick(const aBoolean: boolean; const aTrueFunc: TSFuncBooleanString<TResult>): IAction<TResult>; overload;
@@ -77,6 +93,20 @@ type
     class function pick(const aBoolean: boolean; const aTrueFunc: TAFuncBooleanString<TResult>; const aFalseFunc: TAFuncBooleanString<TResult>): IAction<TResult>; overload;
 
     function perform(const aBoolean: boolean; const aString: string): TResult; overload;
+
+    class function startWith(const aBoolean: boolean): IAction<TResult>;
+
+    function andThen(const aGuardClause: boolean; const aTrueFunc: TOFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
+    function andThen(const aGuardClause: boolean; const aTrueFunc: TSFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
+    function andThen(const aGuardClause: boolean; const aTrueFunc: TAFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
+
+    function plus(const aGuardClause: boolean; const aTrueFunc: TOFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
+    function plus(const aGuardClause: boolean; const aTrueFunc: TSFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
+    function plus(const aGuardClause: boolean; const aTrueFunc: TAFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>; overload;
+
+    function thenFinish: boolean;
+
+    property success: boolean read getSuccess write setSuccess;
   end;
 
   IAction = interface(bazAction.IAction)
@@ -84,9 +114,10 @@ type
 
     function getAssigned: boolean;
     property assigned:    boolean read getAssigned;
+
   end;
 
-  TAction = class(bazAction.TAction, bazAction.IAction)
+  TAction = class(bazAction.TAction, mmpAction.IAction)
   strict private
     FCallAssigned: boolean;
 
@@ -102,7 +133,7 @@ type
     constructor Create(const aProcBooleanString:     TAProcBooleanString       );     overload;
 
   public
-    function getAssigned: boolean;
+    function  getAssigned: boolean;
 
     class function pick(const aBoolean: boolean; const aTrueProc: TOProcBooleanString): IAction; overload;
     class function pick(const aBoolean: boolean; const aTrueProc: TSProcBooleanString): IAction; overload;
@@ -113,6 +144,9 @@ type
     class function pick(const aBoolean: boolean; const aTrueProc: TAProcBooleanString; const aFalseProc: TAProcBooleanString): IAction; overload;
 
     procedure perform(const aBoolean: boolean; const aString: string); overload;
+
+
+
   end;
 
 implementation
@@ -217,6 +251,57 @@ begin
   case assigned(FAFuncBooleanString) of TRUE: EXIT(FAFuncBooleanString(aBoolean, aString)); end;
 end;
 
+
+function TAction<TResult>.andThen(const aGuardClause: boolean; const aTrueFunc: TOFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>;
+var
+  vResult: TResult;
+  bResult: boolean absolute vResult;
+begin
+  case FSuccess and aGuardClause of TRUE: begin
+                                            vResult := aTrueFunc(aBoolean, aString);
+                                            FSuccess := bResult; end;end;
+  result := SELF;
+end;
+
+function TAction<TResult>.andThen(const aGuardClause: boolean; const aTrueFunc: TSFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>;
+var
+  vResult: TResult;
+  bResult: boolean absolute vResult;
+begin
+  case FSuccess and aGuardClause of TRUE: begin
+                                            vResult := aTrueFunc(aBoolean, aString);
+                                            FSuccess := bResult; end;end;
+  result := SELF;
+end;
+
+function TAction<TResult>.andThen(const aGuardClause: boolean; const aTrueFunc: TAFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>;
+var
+  vResult: TResult;
+  bResult: boolean absolute vResult;
+begin
+  case FSuccess and aGuardClause of TRUE: begin
+                                            vResult := aTrueFunc(aBoolean, aString);
+                                            FSuccess := bResult; end;end;
+  result := SELF;
+end;
+
+function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TOFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>;
+begin
+  case FSuccess and aGuardClause of TRUE: aTrueFunc(aBoolean, aString); end;
+  result := SELF;
+end;
+
+function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TSFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>;
+begin
+  case FSuccess and aGuardClause of TRUE: aTrueFunc(aBoolean, aString); end;
+  result := SELF;
+end;
+
+function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: TAFuncBooleanString<TResult>; const aBoolean: boolean; const aString: string): IAction<TResult>;
+begin
+  case FSuccess and aGuardClause of TRUE: aTrueFunc(aBoolean, aString); end;
+  result := SELF;
+end;
 
 { TAction }
 

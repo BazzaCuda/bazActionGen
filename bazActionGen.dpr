@@ -29,7 +29,7 @@ uses
   system.sysUtils,
   vcl.dialogs,
   bazAction in 'Win64\Debug\bazAction.pas',
-  mmpAction in 'Win64\Debug\mmpAction.pas',
+//  mmpAction in 'Win64\Debug\mmpAction.pas',
   bazRTL in '..\_MVVM\_bazLib\bazRTL.pas';
 
 type
@@ -114,6 +114,7 @@ begin
   case aFuncProc of fpFunc: vColon := ':'; end;
 
   for var i := 0 to length(aDefs) - 1 do begin
+    aSL.add('');
     vFuncPrefix := format('%s(' + aDefs[i].paramDefs + ')%s', [vFunctionProcedure, vColon]);
     aSL.add(format('  TO%s%-*s%s = %-*s%s of object; // method of class instance', [vFuncProc, WIDTH_SUFFIX, aDefs[i].suffix, vResult1, WIDTH_PARAMS, vFuncPrefix, vResult2]));
 
@@ -122,8 +123,6 @@ begin
 
     vFuncPrefix := format('reference to %s(' + aDefs[i].paramDefs + ')%s', [vFunctionProcedure, vColon]);
     aSL.add(format('  TA%s%-*s%s = %-*s%s;           // anonymous method', [vFuncProc, WIDTH_SUFFIX, aDefs[i].suffix, vResult1, WIDTH_PARAMS, vFuncPrefix, vResult2]));
-
-    aSL.add('');
   end;
 end;
 
@@ -156,6 +155,32 @@ begin
   aSL.add('');
   aSL.add('    function getAssigned: boolean;'); // correct as a function
   aSL.add('    property assigned:    boolean read getAssigned;');
+
+  case aFuncProc of fpFunc: begin
+  aSL.add('');
+  aSL.add('    function  getSuccess:  boolean;');
+  aSL.add('    procedure setSuccess(const aValue: boolean);');
+  aSL.add('    property  success:     boolean read getSuccess write setSuccess;');
+  end;end;
+
+  case aFuncProc of fpFunc: begin
+    for var i := 0 to length(aDefs) - 1 do begin
+       aSL.add('');
+       aSL.add(format('    function andThen(const aGuardClause: boolean; const aTrueFunc: TOFunc%s<TResult>; %s): IAction<TResult>; overload;', [aDefs[i].suffix, aDefs[i].paramDefs]));
+       aSL.add(format('    function andThen(const aGuardClause: boolean; const aTrueFunc: TSFunc%s<TResult>; %s): IAction<TResult>; overload;', [aDefs[i].suffix, aDefs[i].paramDefs]));
+       aSL.add(format('    function andThen(const aGuardClause: boolean; const aTrueFunc: TAFunc%s<TResult>; %s): IAction<TResult>; overload;', [aDefs[i].suffix, aDefs[i].paramDefs]));
+    end;end;end;
+
+  case aFuncProc of fpFunc: begin
+    for var i := 0 to length(aDefs) - 1 do begin
+       aSL.add('');
+       aSL.add(format('    function plus(const aGuardClause: boolean; const aTrueFunc: TOFunc%s<TResult>; %s): IAction<TResult>; overload;', [aDefs[i].suffix, aDefs[i].paramDefs]));
+       aSL.add(format('    function plus(const aGuardClause: boolean; const aTrueFunc: TSFunc%s<TResult>; %s): IAction<TResult>; overload;', [aDefs[i].suffix, aDefs[i].paramDefs]));
+       aSL.add(format('    function plus(const aGuardClause: boolean; const aTrueFunc: TAFunc%s<TResult>; %s): IAction<TResult>; overload;', [aDefs[i].suffix, aDefs[i].paramDefs]));
+    end;end;end;
+
+  aSL.add('');
+  case aFuncProc of fpFunc: aSL.add('    function thenFinish: boolean;'); end;
   aSL.add('  end;');
 end;
 
@@ -166,7 +191,7 @@ begin
 
   aSL.add('');
   case vUnit = BAZ_ACTION_UNIT of  TRUE: aSL.add(format('  TAction%s = class(TInterfacedObject, IAction%s)', [vResult1, vResult1]));
-                                  FALSE: aSL.add(format('  TAction%s = class(bazAction.TAction%s, bazAction.IAction%s)', [vResult1, vResult1, vResult1])); end;
+                                  FALSE: aSL.add(format('  TAction%s = class(bazAction.TAction%s, %s.IAction%s)', [vResult1, vResult1, vUnit, vResult1])); end;
 end;
 
 procedure writeClassMembers(const aDefs: TDefs; const aSL: TStringList; const aFuncProc: TFuncProc);
@@ -176,6 +201,7 @@ begin
   aSL.add('  strict private');
   aSL.add('    FCallAssigned: boolean;');
   case aFuncProc of fpFunc: aSL.add('    FDefault:      TResult; // initialised by constructor, set by optional .default(), used in .perform()'); end;
+
   aSL.add('');
 
   var vFuncProc := 'Proc';
@@ -223,6 +249,12 @@ begin
     aSL.add(format('    constructor Create(%-*s%-*s%-*s);     overload;', [WIDTH_PARAM_NAME, 'const aProc' + aDefs[i].suffix + ':', WIDTH_FUNC_TYPE, 'TAProc' + aDefs[i].suffix, WIDTH_GENERIC, '']));
     aSL.add('');
   end;end;
+
+  case (aFuncProc = fpFunc) and (vUnit = BAZ_ACTION_UNIT) of TRUE:  begin
+                                                                      aSL.add('');
+                                                                      aSL.add('  protected');
+                                                                      aSL.add('    FSuccess: boolean;'); end;end;
+
 end;
 
 procedure writeClassPicks(const aDefs: TDefs; const aSL: TStringList; const aFuncProc: TFuncProc);
@@ -237,8 +269,11 @@ begin
                               vResult2 := 'TResult'; end;end;
 
   aSL.add('  public');
-  aSL.add('    function getAssigned: boolean;');
-  case aFuncProc of fpFunc: aSL.add('    function default(const aValue: TResult): IAction<TResult>;'); end;
+  aSL.add('    function  getAssigned: boolean;');
+  case aFuncProc of fpFunc: begin
+                              aSL.add('    function  getSuccess:  boolean;');
+                              aSL.add('    procedure setSuccess(const aValue: boolean);');
+                              aSL.add('    function  default(const aValue: TResult): IAction<TResult>;'); end;end;
   aSL.add('');
 
   case aFuncProc of fpFunc:
@@ -282,6 +317,32 @@ begin
 
   for var i := 0 to high(aDefs) do
     aSL.add(format('    %s perform(%s)%s; overload;', [vFunctionProcedure, aDefs[i].paramDefs, vColon + vResult2]));
+
+
+  aSL.add('');
+  case aFuncProc of fpFunc: aSL.add('    class function startWith(const aBoolean: boolean): IAction<TResult>;'); end;
+
+  case aFuncProc of fpFunc:
+    for var i := 0 to length(aDefs) - 1 do begin
+       aSL.add('');
+       aSL.add(format('    function andThen(const aGuardClause: boolean; const aTrueFunc: TOFunc%s<TResult>; %s): IAction<TResult>; overload;', [aDefs[i].suffix, aDefs[i].paramDefs]));
+       aSL.add(format('    function andThen(const aGuardClause: boolean; const aTrueFunc: TSFunc%s<TResult>; %s): IAction<TResult>; overload;', [aDefs[i].suffix, aDefs[i].paramDefs]));
+       aSL.add(format('    function andThen(const aGuardClause: boolean; const aTrueFunc: TAFunc%s<TResult>; %s): IAction<TResult>; overload;', [aDefs[i].suffix, aDefs[i].paramDefs]));
+    end;end;
+
+  case aFuncProc of fpFunc:
+    for var i := 0 to length(aDefs) - 1 do begin
+       aSL.add('');
+       aSL.add(format('    function plus(const aGuardClause: boolean; const aTrueFunc: TOFunc%s<TResult>; %s): IAction<TResult>; overload;', [aDefs[i].suffix, aDefs[i].paramDefs]));
+       aSL.add(format('    function plus(const aGuardClause: boolean; const aTrueFunc: TSFunc%s<TResult>; %s): IAction<TResult>; overload;', [aDefs[i].suffix, aDefs[i].paramDefs]));
+       aSL.add(format('    function plus(const aGuardClause: boolean; const aTrueFunc: TAFunc%s<TResult>; %s): IAction<TResult>; overload;', [aDefs[i].suffix, aDefs[i].paramDefs]));
+    end;end;
+
+  aSL.add('');
+  case aFuncProc of fpFunc: aSL.add('    function thenFinish: boolean;'); end;
+
+  aSL.add('');
+  case aFuncProc of fpFunc: aSL.add('    property success: boolean read getSuccess write setSuccess;'); end;
 
   aSL.add('  end;');
 end;
@@ -531,6 +592,73 @@ begin
   end;
 end;
 
+procedure writeAndThens(const aDefs: TDefs; const aSL: TStringList; const aFuncProc: TFuncProc);
+begin
+  for var i := 0 to high(aDefs) do begin
+    var vTOTSTA := 'TO';
+    for var j := 1 to 3 do begin
+      aSL.add('');
+      aSL.add(format('function TAction<TResult>.andThen(const aGuardClause: boolean; const aTrueFunc: %sFunc%s<TResult>; %s): IAction<TResult>;', [vTOTSTA, aDefs[i].suffix, aDefs[i].paramDefs]));
+      aSL.add('var');
+      aSL.add('  vResult: TResult;');
+      aSL.add('  bResult: boolean absolute vResult;');
+      aSL.add('begin');
+      aSL.add('  case FSuccess and aGuardClause of TRUE: begin');
+      aSL.add(format('                                            vResult := aTrueFunc(%s);', [aDefs[i].paramList]));
+      aSL.add('                                            FSuccess := bResult; end;end;');
+      aSL.add('  result := SELF;');
+//      aSL.add('  IInterface(result) := SELF;');
+//      aSL.add('  PPointer(@result)^ := pointer(SELF);');
+//      aSL.add('  result := IAction<TResult>(SELF);');
+      aSL.add('end;');
+      case vTOTSTA = 'TS' of TRUE: vTOTSTA := 'TA'; end;
+      case vTOTSTA = 'TO' of TRUE: vTOTSTA := 'TS'; end;
+    end;end;
+
+  for var i := 0 to high(aDefs) do begin
+    var vTOTSTA := 'TO';
+    for var j := 1 to 3 do begin
+      aSL.add('');
+      aSL.add(format('function TAction<TResult>.plus(const aGuardClause: boolean; const aTrueFunc: %sFunc%s<TResult>; %s): IAction<TResult>;', [vTOTSTA, aDefs[i].suffix, aDefs[i].paramDefs]));
+      aSL.add('begin');
+      aSL.add(format('  case FSuccess and aGuardClause of TRUE: aTrueFunc(%s); end;', [aDefs[i].paramList]));
+      aSL.add('  result := SELF;');
+//      aSL.add('  IInterface(result) := SELF;');
+//      aSL.add('  PPointer(@result)^ := pointer(SELF);');
+//      aSL.add('  result := IAction<TResult>(SELF);');
+      aSL.add('end;');
+      case vTOTSTA = 'TS' of TRUE: vTOTSTA := 'TA'; end;
+      case vTOTSTA = 'TO' of TRUE: vTOTSTA := 'TS'; end;
+    end;end;
+
+  case vUnit = BAZ_ACTION_UNIT of TRUE: begin
+    aSL.add('');
+    aSL.add('function TAction<TResult>.getSuccess: boolean;');
+    aSL.add('begin');
+    aSL.add('  result := FSuccess;');
+    aSL.add('end;');
+
+    aSL.add('');
+    aSL.add('procedure TAction<TResult>.setSuccess(const aValue: boolean);');
+    aSL.add('begin');
+    aSL.add('  FSuccess := aValue;');
+    aSL.add('end;');
+
+    aSL.add('');
+    aSL.add('class function TAction<TResult>.startWith(const aBoolean: boolean): IAction<TResult>;');
+    aSL.add('begin');
+    aSL.add('  result             := TAction<TResult>.Create(NIL);');
+    aSL.add('  result.success     := aBoolean;');
+    aSL.add('end;');
+
+    aSL.add('');
+    aSL.add('function TAction<TResult>.thenFinish: boolean;');
+    aSL.add('begin');
+    aSL.add('  result := FSuccess;');
+    aSL.add('end;');
+  end;end;
+end;
+
 function copySection(const aHeader: string; const aFilePath: string; const aSL: TStringList): TVoid;
 begin
   var vInput := TStringList.create;
@@ -595,6 +723,7 @@ begin
     writePicksTrueFunc        (aDefs, vSL, fpFunc);
     writePicksTrueFalseFunc   (aDefs, vSL, fpFunc);
     writePerforms             (aDefs, vSL, fpFunc);
+    writeAndThens             (aDefs, vSL, fpFunc);
 
 // implementation section procedures
 //    writeImplementationHeader (       vSL, fpProc);
@@ -605,6 +734,9 @@ begin
     writePerforms             (aDefs, vSL, fpProc);
 
     vSL.add('end.');
+
+    for var i := 0 to vSL.count - 1 do
+      vSL[i] := stringReplace(vSL[i], '; )', ')', []);
 
     vSL.saveToFile(vUnit + '.pas');
   finally
@@ -724,10 +856,18 @@ begin
 
     copySection('', FILE_PATH_IN, NIL); // obtain vUnit only
 
-    readDefs  (vDefs, FILE_PATH_IN);
-    writeUnit (vDefs, FILE_PATH_IN);
+//    readDefs  (vDefs, FILE_PATH_IN);
+//    writeUnit (vDefs, FILE_PATH_IN);
 
     //var vResult := TAction<boolean>.pick(TRUE, test).perform('hello', TRUE);
+
+    var result := TAction<boolean>.startWith(TRUE)
+                    .andThen(TRUE, function:boolean begin writeln('first andThen'); result := TRUE; end)
+                    .andThen(TRUE, function:boolean begin writeln('second andThen'); result := TRUE; end)
+                    .thenFinish;
+
+    case result of   TRUE: writeln('TRUE');
+                    FALSE: writeln('FALSE'); end;
 
 //    var vTestParts := 'LoadsASpaces:  boolean  string           '.split([' ']);
 //    var vTestParts := 'StringInteger: string integer'.split([':']);
