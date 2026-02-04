@@ -135,6 +135,7 @@ begin
   var vResult2            := '';
   var vColon              := '';
   var vFunctionProcedure  := 'procedure';
+
   case aFuncProc of fpFunc: begin
                               vFunctionProcedure  := 'function';
                               vColon              := ': ';
@@ -146,8 +147,8 @@ begin
                                   FALSE: aSL.add(format('  IAction%s = interface(bazAction.IAction%s)', [vResult1, vResult1])); end;
 
   case aFuncProc of fpFunc: begin
-  aSL.add(format('    function default(const aValue: %s): IAction%s; // the fallback value', [vResult2, vResult1])); // correct as a function
-  aSL.add(''); end;end;
+                              aSL.add(format('    function default(const aValue: %s): IAction%s; // the fallback value', [vResult2, vResult1])); // correct as a function
+                              aSL.add(''); end;end;
 
   for var i := 0 to length(aDefs) - 1 do
     aSL.add(format('    %s perform(%s)%s; overload;', [vFunctionProcedure, aDefs[i].paramDefs, vColon + vResult2]));
@@ -505,12 +506,12 @@ begin
   case vUnit = BAZ_ACTION_UNIT of FALSE: vPointerSuffix := '))'; end;
 
   case aFuncProc of fpFunc: begin
-  aSL.add(format('function TAction%s.default(const aValue: TResult): IAction%s;', [vResult1, vResult1]));     // procedures don't have a default result
-  aSL.add('begin');
-  aSL.add('  FDefault := aValue;');
-  aSL.add(format('  result   := %sSELF%s;', [vPointerPrefix, vPointerSuffix]));
-  aSL.add('end;');
-  aSL.add(''); end;end;
+                              aSL.add(format('function TAction%s.default(const aValue: TResult): IAction%s;', [vResult1, vResult1])); // procedures don't have a default result, apparently :P
+                              aSL.add('begin');
+                              aSL.add('  FDefault := aValue;');
+                              aSL.add(format('  result   := %sSELF%s;', [vPointerPrefix, vPointerSuffix]));
+                              aSL.add('end;');
+                              aSL.add(''); end;end;
 
   for var i := 0 to high(aDefs) do
   begin
