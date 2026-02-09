@@ -55,7 +55,6 @@ type
 const
   BAZ_ACTION_UNIT   = 'bazAction';
   FILE_PATH_IN      = 'bazActionDefs.txt';
-  FILE_PATH_OUT     = 'bazAction.pas';
 
 var
   vDefs: TDefs;
@@ -76,6 +75,7 @@ procedure writeType(const vUnit: string; const aDefs: TDefs; const aSL: TStringL
 begin
   case aFuncProc of fpFunc: begin
                               aSL.add('type');
+                              aSL.add('  TVoid = bazFuncDefs.TVoid;');
                               //case vUnit = BAZ_ACTION_UNIT of  TRUE: aSL.add('  TVoid = record end;');
                               //                                FALSE: aSL.add('  TVoid = bazAction.TVoid;'); end;
                               end;end;

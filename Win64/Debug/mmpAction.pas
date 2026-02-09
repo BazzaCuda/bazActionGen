@@ -27,6 +27,7 @@ uses
   bazAction, bazFuncDefs;
       
 type
+  TVoid = bazFuncDefs.TVoid;
 
   TAction<TResult> = class(bazAction.TAction<TResult>)
 
